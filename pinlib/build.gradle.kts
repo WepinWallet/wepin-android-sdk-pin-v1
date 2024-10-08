@@ -99,7 +99,7 @@ afterEvaluate {
             register<MavenPublication>("release") {
                 from(components["release"])
                 groupId = "com.github.WepinWallet"
-                artifactId = "wepin-android-sdk-pin"
+                artifactId = "wepin-android-sdk-pin-v1"
             }
         }
     }

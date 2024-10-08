@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tv_login_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:text="@string/app_name"
+        android:gravity="center" />
+
+    <ListView
+        android:id="@+id/lv_menu"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="vertical"
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="@string/result"
+        android:textColor="@color/black"
+        android:gravity="center_horizontal" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="vertical"
+        android:layout_marginTop="5dp"
+        android:fillViewport="true"
+        android:background="@color/white"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
+
+        <TextView
+            android:id="@+id/tv_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:scrollbars="vertical"
+            android:background="@color/black"
+            android:textColor="@color/white"
+            android:padding="15dp"
+            android:text="@string/default_result" />
+    </ScrollView>
+
+</LinearLayout>
+
+    <!--<?xml version="1.0" encoding="utf-8"?>-->
+<!--&lt;!&ndash;<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"&ndash;&gt;-->
+<!--&lt;!&ndash;    android:id="@+id/scroll_view"&ndash;&gt;-->
+<!--&lt;!&ndash;    android:layout_width="match_parent"&ndash;&gt;-->
+<!--&lt;!&ndash;    android:layout_height="match_parent">&ndash;&gt;-->
+<!--    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--        xmlns:tools="http://schemas.android.com/tools"-->
+<!--        android:id="@+id/main"-->
+<!--        android:orientation="vertical"-->
+<!--        android:layout_width="fill_parent"-->
+<!--        android:layout_height="fill_parent"-->
+
+<!--        android:weightSum="2"-->
+<!--        >-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/tv_login_main"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginTop="25dp"-->
+<!--            android:textAlignment="center"-->
+<!--            android:textSize="20sp"-->
+<!--            android:text="@string/app_name" />-->
+
+<!--    <ListView-->
+<!--        android:id="@+id/lv_menu"-->
+<!--        android:layout_width="fill_parent"-->
+<!--        android:layout_height="fill_parent"-->
+<!--        android:scrollbars="vertical"-->
+<!--        android:layout_weight="0.8"-->
+<!--        >-->
+<!--    </ListView>-->
+<!--&lt;!&ndash;        <ScrollView&ndash;&gt;-->
+<!--&lt;!&ndash;            android:id="@+id/scroll_view"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_width="match_parent"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_below="@+id/tv_login_main"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_weight="0.8"&ndash;&gt;-->
+<!--&lt;!&ndash;            >&ndash;&gt;-->
+<!--&lt;!&ndash;            <LinearLayout&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_width="match_parent"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:orientation="vertical"&ndash;&gt;-->
+<!--&lt;!&ndash;                >&ndash;&gt;-->
+
+<!--&lt;!&ndash;                <Button&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:id="@+id/bt_google_login"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_width="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_marginTop="10dp"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:text="@string/oauth_google_login" />&ndash;&gt;-->
+
+<!--&lt;!&ndash;                <Button&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:id="@+id/bt_accesstoken_login_discord"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_width="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_marginTop="10dp"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:text="@string/accessToken_discord_login" />&ndash;&gt;-->
+
+<!--&lt;!&ndash;                <Button&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:id="@+id/bt_sign_token"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_width="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_marginTop="10dp"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:text="@string/sign_token" />&ndash;&gt;-->
+<!--&lt;!&ndash;            </LinearLayout>&ndash;&gt;-->
+
+
+<!--&lt;!&ndash;    </ScrollView>&ndash;&gt;-->
+<!--    <TextView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:textSize="20sp"-->
+<!--        android:text="Result"-->
+<!--        android:textColor="@color/black"-->
+<!--        android:gravity="center_horizontal"-->
+<!--        />-->
+<!--    <ScrollView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:scrollbars="vertical"-->
+<!--        android:layout_marginTop="5dp"-->
+<!--        android:fillViewport="true"-->
+<!--        android:minHeight="900dp"-->
+<!--        android:background="@color/white"-->
+<!--        android:paddingStart="20dp"-->
+<!--        android:paddingEnd="20dp"-->
+<!--        >-->
+<!--        <TextView-->
+<!--            android:id="@+id/tv_result"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:textSize="15sp"-->
+<!--            android:scrollbars="vertical"-->
+<!--            android:background="@color/black"-->
+<!--            android:textColor="@color/white"-->
+<!--            />-->
+<!--    </ScrollView>-->
+
+
+<!--    </LinearLayout>-->
+<!--&lt;!&ndash;</ScrollView>&ndash;&gt;-->

@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">Wepin SDK V1 Sample</string>
+    <string name="result">Result</string>
+    <string name="default_result">Your long text goes here…</string>
+
+    <string name="wepin_app_id">6bf47fc3fbebd80d2792e359e0480f4c</string>
+    <string name="wepin_app_key">ak_dev_7zgBD2Oo5p2AfHKzU6xaEbSWU4XgknIVZgtj6PhWMYn</string>
+    <string name="wepin_app_private_key">f4de6c55a8199107baf4afa95be40456688814bfc723ea2f22bb24675fcdf730</string>
+
+<!--    <string name="wepin_app_id">a1852ca938e320ca17105ac818f2b1ae</string>-->
+<!--    <string name="wepin_app_key">ak_test_XpMjKcIPyMkUxMlmPa12ACBqGWY8WoY3HaixpJ3UNzv</string>-->
+<!--    <string name="wepin_app_private_key">765ed161ebde69b3da50156f46bd90683f61ef443df813f8999bf508bb95fe57</string>-->
+
+    <!--Test With Login Library-->
+    <string name="item_login_with_loginLib_google">login With LoginLibrary(google)</string>
+
+    <!--Test with Pin Pad Library-->
+    <string name="item_init">init PIN pad library</string>
+    <string name="item_isInitialized">isInitialized</string>
+    <string name="item_change_language">change Language</string>
+    <string name="item_gen_registration_pin_block_for_register">generate Registration PIN Block for Register</string>
+    <string name="item_request_register_with_registration_pin_block">request register with Registration PIN Block</string>
+    <string name="item_gen_auth_pin_block_for_register">generate Auth PIN Block for Register </string>
+    <string name="item_request_register_with_auth_pin_block">request register with Auth PIN Block</string>
+    <string name="item_gen_auth_pin_block_for_sign">generate Auth PIN Block for Sign</string>
+    <string name="item_request_sign_with_auth_pin_block">request sign with Auth PIN Block</string>
+    <string name="item_gen_change_pin_block">generate Change PIN Block</string>
+    <string name="item_request_change_pin_with_change_pin_block">request change PIN with Change PIN Block</string>
+    <string name="item_gen_auth_otp_code">generate Auth OTP Code</string>
+    <string name="item_finalize">finalize</string>
+
+    <!--Need For Google Login Test-->
+    <string name="default_google_web_client_id">1006602884997-ti7v6ldm1obtu209uousvfkh2e58klf6.apps.googleusercontent.com</string>
+
+</resources>

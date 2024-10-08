@@ -573,6 +573,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     resources.getString(R.string.item_finalize) -> {
+                        wepinLogin.finalize()
                         wepinPin.finalize()
                         tvResult?.text = String.format(
                             " Item : %s\n Result : %s",

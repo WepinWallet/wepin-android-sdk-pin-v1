@@ -150,7 +150,7 @@ This method should only be used when the loginStatus is pinRequired.
    - uvd: \<EncUVD> - Encrypted PIN
      - b64Data \<String> - Data encrypted with the original key in b64SKey
      - b64SKey \<String> - A key that encrypts data encrypted with the Wepin's public key.
-     - seqNum \<Int> - __optionl__ Values to check for when using PIN numbers to ensure they are used in order.
+     - seqNum \<Int> - __optional__ Values to check for when using PIN numbers to ensure they are used in order.
    - hint: \<EncPinHint> - Hints in the encrypted PIN.
      - data \<String> - Encrypted hint data.
      - length \<String> - The length of the hint
@@ -182,8 +182,8 @@ Generates a pin block for authentication.
    - uvdList: \<List<EncUVD>> - Encypted pin list
      - b64Data \<String> - Data encrypted with the original key in b64SKey
      - b64SKey \<String> - A key that encrypts data encrypted with the wepin's public key.
-     - seqNum \<Int> - __optionl__ Values to check for when using PIN numbers to ensure they are used in order
-   - otp \<String> - __optionl__ If OTP authentication is required, include the OTP.
+     - seqNum \<Int> - __optional__ Values to check for when using PIN numbers to ensure they are used in order
+   - otp \<String> - __optional__ If OTP authentication is required, include the OTP.
 
 #### Example
 ```kotlin
@@ -211,16 +211,16 @@ Generate pin block for changing the PIN.
    - uvd: \<EncUVD> - Encrypted PIN
      - b64Data \<String> - Data encrypted with the original key in b64SKey
      - b64SKey \<String> - A key that encrypts data encrypted with the wepin's public key.
-     - seqNum \<Int> - __optionl__ Values to check for when using PIN numbers to ensure they are used in order
+     - seqNum \<Int> - __optional__ Values to check for when using PIN numbers to ensure they are used in order
    - newUVD: \<EncUVD> - New encrypted PIN
      - b64Data \<String> - Data encrypted with the original key in b64SKey
      - b64SKey \<String> - A key that encrypts data encrypted with the wepin's public key.
-     - seqNum \<Int> - __optionl__ Values to check for when using PIN numbers to ensure they are used in order
+     - seqNum \<Int> - __optional__ Values to check for when using PIN numbers to ensure they are used in order
    - hint: \<EncPinHint> - Hints in the encrypted PIN
      - data \<String> - Encrypted hint data
      - length \<String> - The length of the hint
      - version \<Int> - The version of the hint
-   - otp \<String> - __optionl__ If OTP authentication is required, include the OTP.
+   - otp \<String> - __optional__ If OTP authentication is required, include the OTP.
 
 #### Example
 ```kotlin
@@ -245,7 +245,7 @@ generate OTP.
    
 #### Returns
  - CompletableFuture\<AuthOTP>
-   - code \<String> - __optionl__ The OTP entered by the user.
+   - code \<String> - __optional__ The OTP entered by the user.
 
 #### Example
 ```kotlin
@@ -267,7 +267,7 @@ wepinPin.finalize()
 The `finalize()` method finalizes the Wepin PinPad Libarary.
 
 #### Parameters
- - Void
+ - void
 
 #### Returns
  - void

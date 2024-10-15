@@ -139,7 +139,7 @@ class WepinPin(wepinPinParams: WepinPinParams) {
         return completableFuture
     }
 
-    fun generateAuthPINBlock(): CompletableFuture<AuthPinBlock?> {
+    fun generateAuthPINBlock(count: Int? = null): CompletableFuture<AuthPinBlock?> {
         Log.i(TAG, "generateAuthPINBlock")
         val completableFuture = CompletableFuture<AuthPinBlock?>()
         val subCommand: String = Command.CMD_SUB_PIN_AUTH
@@ -152,7 +152,10 @@ class WepinPin(wepinPinParams: WepinPinParams) {
         checkExistWepinLoginSession()
             .thenCompose { sessionExists ->
                 if (sessionExists) {
-                    val param = mapOf("count" to 1)
+                    var param = mapOf("count" to 1)
+                    if(count != null) {
+                        param = mapOf("count" to count)
+                    }
                     _wepinPinManager.openAndRequestWepinWidgetAsync(subCommand, param)
                 } else {
                     throw WepinError.INVALID_LOGIN_SESSION

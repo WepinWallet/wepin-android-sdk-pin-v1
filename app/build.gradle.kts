@@ -19,7 +19,7 @@ android {
             useSupportLibrary = true
         }
         // For Deep Link => RedirectScheme Format : wepin. + Wepin App ID
-        // manifestPlaceholders["appAuthRedirectScheme"] =  "wepin.a1852ca938e320ca17105ac818f2b1ae" //Stage
+        //manifestPlaceholders["appAuthRedirectScheme"] =  "wepin.a1852ca938e320ca17105ac818f2b1ae" //Stage
         manifestPlaceholders["appAuthRedirectScheme"] =  "wepin.6bf47fc3fbebd80d2792e359e0480f4c" // Dev
     }
 
@@ -70,7 +70,6 @@ dependencies {
     implementation("com.github.WepinWallet:wepin-android-sdk-login-v1:v0.0.2")
 
     implementation(project(":pinlib"))
-
 
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")

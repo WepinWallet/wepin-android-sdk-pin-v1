@@ -170,12 +170,12 @@ This method should only be used when the loginStatus is pinRequired.
 
 ### generateAuthPINBlock
 ```kotlin
-wepinPin.generateAuthPINBlock()
+wepinPin.generateAuthPINBlock(3)
 ```
 Generates a pin block for authentication.
 
 #### Parameters
- - void
+  - `count` \<Int> - __optional__ If multiple PIN blocks are needed, please enter the number to generate. If the count value is not provided, it will default to 1.
    
 #### Returns
  - CompletableFuture\<AuthPinBlock>
@@ -186,8 +186,8 @@ Generates a pin block for authentication.
    - otp \<String> - __optional__ If OTP authentication is required, include the OTP.
 
 #### Example
-```kotlin
-    wepinPin.generateAuthPINBlock().whenComplete { res, err ->
+```kotlin    
+    wepinPin.generateAuthPINBlock(3).whenComplete { res, err ->
         if (err == null) {
             authPin = AuthPinBlock(uvdList = res!!.uvdList, otp = res!!.otp)
             // You need to make a Wepin RESTful API request using the received data.

@@ -101,6 +101,8 @@ class MainActivity : ComponentActivity() {
                 resources.getString(R.string.item_request_register_with_auth_pin_block),
                 resources.getString(R.string.item_gen_auth_pin_block_for_sign),
                 resources.getString(R.string.item_request_sign_with_auth_pin_block),
+                resources.getString(R.string.item_gen_auth_pin_block_for_multi_tx_sign),
+                resources.getString(R.string.item_request_multi_tx_sign_with_auth_pin_block),
                 resources.getString(R.string.item_gen_change_pin_block),
                 resources.getString(R.string.item_request_change_pin_with_change_pin_block),
                 resources.getString(R.string.item_gen_auth_otp_code),
@@ -471,6 +473,109 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
+                    resources.getString(R.string.item_gen_auth_pin_block_for_multi_tx_sign) -> {
+                        if (wepinUser == null){
+                            tvResult?.text = String.format(
+                                " Item : %s\n Error : %s",
+                                operationItem,
+                                "Login required"
+                            )
+                            return@OnItemClickListener
+                        }
+                        wepinPin.generateAuthPINBlock(3).whenComplete { res, err ->
+                            if (err == null) {
+                                authPin = AuthPinBlock(uvdList = res!!.uvdList, otp = res!!.otp)
+                                tvResult?.text = String.format(
+                                    " Item : %s\n Result : %s",
+                                    operationItem,
+                                    res
+                                )
+                            } else {
+                                tvResult?.text = String.format(
+                                    " Item : %s\n Error : %s",
+                                    operationItem,
+                                    err
+                                )
+                            }
+                        }
+                    }
+
+                    resources.getString(R.string.item_request_multi_tx_sign_with_auth_pin_block) -> {
+                        if (wepinUser == null){
+                            tvResult?.text = String.format(
+                                " Item : %s\n Error : %s",
+                                operationItem,
+                                "Login required"
+                            )
+                            return@OnItemClickListener
+                        }
+                        if( authPin == null ){
+                            tvResult?.text = String.format(
+                                " Item : %s\n Result : %s",
+                                operationItem,
+                                "authPin null"
+                            )
+                            return@OnItemClickListener
+                        }
+
+                        val resultBuilder = StringBuilder()
+                        resultBuilder.append(" Item : $operationItem\n")
+
+                        network.setAuthToken(wepinUser!!.token!!.accessToken, wepinUser!!.token!!.refreshToken)
+                        // Wepin RESTful API 요청
+                        CoroutineScope(Dispatchers.Main).launch {
+                            try {
+                                val getAccountListRequest = GetAccountListRequest(
+                                    walletId = wepinUser!!.walletId!!,
+                                    userId = wepinUser!!.userInfo!!.userId,
+                                    localeId = "1"
+                                )
+                                val accountRes = withContext(Dispatchers.IO) {
+                                    network.getAppAccountList(getAccountListRequest)
+                                }
+
+                                authPin!!.uvdList.forEachIndexed  { index, uvd ->
+                                    val otpCode = if (authPin!!.otp != null) {
+                                        OtpCode(
+                                            code = authPin!!.otp!!,
+                                            recovery = false
+                                        )
+                                    } else {
+                                        null
+                                    }
+
+                                    val signRequest = SignRequest(
+                                        userId = wepinUser!!.userInfo!!.userId,
+                                        type = "msg_sign",
+                                        accountId = accountRes.accounts.first().accountId,
+                                        walletId = wepinUser!!.walletId!!,
+                                        pin = uvd,
+                                        txData = mapOf("data" to "multTxTestData%d".format((index + 1) * 50)),
+                                        otpCode = otpCode
+                                    )
+
+                                    val mutiTxSignRes = withContext(Dispatchers.IO) {
+                                        network.sign(signRequest)
+                                    }
+                                    var result = String.format("SignResponse[%d] : %s\n",index + 1, mutiTxSignRes)
+                                    resultBuilder.append(result)
+                                }
+
+                                tvResult?.text = resultBuilder.toString()
+                            } catch (e: Exception) {
+                                // 예외 처리
+                                e.printStackTrace()
+                                println("failed: ${e.message}")
+                                tvResult?.text = String.format(
+                                    " Item : %s\n Result : %s",
+                                    operationItem,
+                                    e.message
+                                )
+                            }
+                        }
+                    }
+
+
                     resources.getString(R.string.item_gen_change_pin_block) -> {
                         wepinPin.generateChangePINBlock().whenComplete { res, err ->
                             if (err == null) {
@@ -573,7 +678,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     resources.getString(R.string.item_finalize) -> {
-                        wepinLogin.finalize()
+						wepinLogin.finalize()
                         wepinPin.finalize()
                         tvResult?.text = String.format(
                             " Item : %s\n Result : %s",

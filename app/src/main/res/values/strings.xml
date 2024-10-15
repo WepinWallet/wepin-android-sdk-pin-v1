@@ -24,6 +24,8 @@
     <string name="item_request_register_with_auth_pin_block">request register with Auth PIN Block</string>
     <string name="item_gen_auth_pin_block_for_sign">generate Auth PIN Block for Sign</string>
     <string name="item_request_sign_with_auth_pin_block">request sign with Auth PIN Block</string>
+    <string name="item_gen_auth_pin_block_for_multi_tx_sign">generate Auth PIN Block for Multi Tx Sign</string>
+    <string name="item_request_multi_tx_sign_with_auth_pin_block">request multi tx sign with Auth PIN Block</string>
     <string name="item_gen_change_pin_block">generate Change PIN Block</string>
     <string name="item_request_change_pin_with_change_pin_block">request change PIN with Change PIN Block</string>
     <string name="item_gen_auth_otp_code">generate Auth OTP Code</string>

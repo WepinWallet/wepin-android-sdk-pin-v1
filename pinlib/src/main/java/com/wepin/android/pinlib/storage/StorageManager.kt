@@ -58,7 +58,7 @@ internal object StorageManager {
 
     // Set EncryptedSharedPreferences
     fun setStorage(key: String, data: Any) {
-        Log.i(TAG, "setStorage")
+        //Log.i(TAG, "setStorage")
         if (this::sharedPreferences.isInitialized) {
             val appSpecificKey = "${_appId}_$key"
             when (data) {
@@ -86,7 +86,7 @@ internal object StorageManager {
 
     // Get EncryptedSharedPreferences
     fun getStorage(key: String): Any? {
-        Log.i(TAG, "getStorage")
+        //Log.i(TAG, "getStorage")
         var stringData: String? = null
         try {
             if (this::sharedPreferences.isInitialized) {
@@ -176,7 +176,7 @@ internal object StorageManager {
     }
 
     private fun getEncryptedDataPair(data: String): Pair<ByteArray, ByteArray> {
-        Log.i(TAG, "getEncryptedDataPair")
+        //Log.i(TAG, "getEncryptedDataPair")
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, getKey())
 
@@ -186,7 +186,7 @@ internal object StorageManager {
     }
 
     private fun getKey(): SecretKey {
-        Log.i(TAG, "getKey")
+        //Log.i(TAG, "getKey")
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null)
         val secreteKeyEntry: KeyStore.SecretKeyEntry =

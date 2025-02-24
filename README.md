@@ -245,7 +245,7 @@ generate OTP.
    
 #### Returns
  - CompletableFuture\<AuthOTP>
-   - code \<String> - __optional__ The OTP entered by the user.
+   - code \<String> - The OTP entered by the user.
 
 #### Example
 ```kotlin

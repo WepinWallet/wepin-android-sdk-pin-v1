@@ -1,7 +1,5 @@
 package com.wepin.android.pinlib.error
 
-import com.wepin.android.pinlib.types.ErrorCode
-import com.wepin.android.pinlib.types.WepinPinError
 import org.json.JSONObject
 
 class WepinError : Exception {
@@ -9,73 +7,68 @@ class WepinError : Exception {
     var errorMessage: String? = null
     var code: Int = 0
 
-    constructor() : super() {
-        errorReason = null
-    }
-
-    constructor(response: JSONObject?) {
-        errorReason = response
-        errorMessage = response?.toString()
-    }
-
-    constructor(exceptionMessage: String?) : super(exceptionMessage) {
-        errorMessage = exceptionMessage
-    }
-
-    constructor(exceptionMessage: String?, reason: Throwable?) : super(exceptionMessage, reason) {
-        errorReason = null
-        errorMessage = exceptionMessage
-    }
-
-    constructor(cause: Throwable?) : super(cause) {
-        errorReason = null
-        errorMessage = cause?.message
-    }
-
     constructor(code: Int, errorDescription: String) : super(errorDescription) {
         this.code = code
         this.errorMessage = errorDescription
     }
 
-    /* package */
     fun setErrorCode(errCode: Int) {
         this.code = errCode
     }
-
-    fun getErrorCode(): Int {
-        return code
-    }
+    fun getErrorCode(): Int = code
 
     companion object {
-        val USER_CANCELED = WepinError.generalEx(ErrorCode.USER_CANCELLED)
-        val INVALID_APP_KEY = WepinError.generalEx(ErrorCode.INVALID_APP_KEY)
-        val INVALID_PARAMETER = WepinError.generalEx(ErrorCode.INVALID_PARAMETER)
-        val INVALID_LOGIN_PROVIDER = WepinError.generalEx(ErrorCode.INVALID_LOGIN_PROVIDER)
-        val INVALID_TOKEN = WepinError.generalEx(ErrorCode.INVALID_TOKEN)
-        val INVALID_LOGIN_SESSION = WepinError.generalEx(ErrorCode.INVALID_LOGIN_SESSION)
-        val NOT_INITIALIZED_ERROR = WepinError.generalEx(ErrorCode.NOT_INITIALIZED_ERROR)
-        val ALREADY_INITIALIZED_ERROR = WepinError.generalEx(ErrorCode.ALREADY_INITIALIZED_ERROR)
-        val NOT_ACTIVITY = WepinError.generalEx(ErrorCode.NOT_ACTIVITY)
-        val NOT_CONNECTED_INTERNET = WepinError.generalEx(ErrorCode.NOT_CONNECTED_INTERNET)
-        val FAILED_LOGIN = WepinError.generalEx(ErrorCode.FAILED_LOGIN)
-        val INVALID_EMAIL_DOMAIN = WepinError.generalEx(ErrorCode.INVALID_EMAIL_DOMAIN)
-        val FAILED_SEND_EMAIL = WepinError.generalEx(ErrorCode.FAILED_SEND_EMAIL)
-        val REQUIRED_EMAIL_VERIFIED = WepinError.generalEx(ErrorCode.REQUIRED_EMAIL_VERIFIED)
-        val INCORRECT_EMAIL_FORM = WepinError.generalEx(ErrorCode.INCORRECT_EMAIL_FORM)
-        val INCORRECT_PASSWORD_FORM = WepinError.generalEx(ErrorCode.INCORRECT_PASSWORD_FORM)
-        val NOT_INITIALIZED_NETWORK = WepinError.generalEx(ErrorCode.NOT_INITIALIZED_NETWORK)
-        val REQUIRED_SIGNUP_EMAIL = WepinError.generalEx(ErrorCode.REQUIRED_SIGNUP_EMAIL)
-        val FAILED_EMAIL_VERIFIED = WepinError.generalEx(ErrorCode.FAILED_EMAIL_VERIFIED)
-        val FAILED_PASSWORD_SETTING = WepinError.generalEx(ErrorCode.FAILED_PASSWORD_SETTING)
-        val EXISTED_EMAIL = WepinError.generalEx(ErrorCode.EXISTED_EMAIL)
-        val ALREADY_LOGOUT = WepinError.generalEx(ErrorCode.ALREADY_LOGOUT)
+        enum class ErrorCode {
+            INVALID_APP_KEY,
+            INVALID_PARAMETER,
+            INVALID_TOKEN,
+            INVALID_LOGIN_SESSION,
+            NOT_INITIALIZED_ERROR,
+            ALREADY_INITIALIZED_ERROR,
+            NOT_ACTIVITY,
+            USER_CANCELLED,
+            UNKNOWN_ERROR,
+            NOT_CONNECTED_INTERNET,
+            FAILED_LOGIN,
+            ALREADY_LOGOUT,
+            NOT_INITIALIZED_NETWORK
+        }
 
-        private fun generalEx(errorDescription: ErrorCode): WepinError {
-            return WepinError(WepinPinError.getError(errorDescription))
+        val USER_CANCELED = generalEx(ErrorCode.USER_CANCELLED, "User cancelled")
+        val INVALID_APP_KEY = generalEx(ErrorCode.INVALID_APP_KEY, "Invalid app key")
+        val INVALID_PARAMETER = generalEx(ErrorCode.INVALID_PARAMETER, "Invalid parameter")
+        val INVALID_TOKEN = generalEx(ErrorCode.INVALID_TOKEN, "Token does not exist")
+        val INVALID_LOGIN_SESSION = generalEx(ErrorCode.INVALID_LOGIN_SESSION, "Invalid Login Session")
+        val NOT_INITIALIZED_ERROR = generalEx(ErrorCode.NOT_INITIALIZED_ERROR, "Not initialized Error")
+        val ALREADY_INITIALIZED_ERROR = generalEx(ErrorCode.ALREADY_INITIALIZED_ERROR, "Already initialized")
+        val NOT_ACTIVITY = generalEx(ErrorCode.NOT_ACTIVITY, "Context is not activity")
+        val NOT_CONNECTED_INTERNET = generalEx(ErrorCode.NOT_CONNECTED_INTERNET, "No internet connection")
+        val FAILED_LOGIN = generalEx(ErrorCode.FAILED_LOGIN, "Failed Oauth log in")
+        val NOT_INITIALIZED_NETWORK = generalEx(ErrorCode.NOT_INITIALIZED_NETWORK, "Network Manager not initialized.")
+        val ALREADY_LOGOUT = generalEx(ErrorCode.ALREADY_LOGOUT, "Already logged out")
+        val UNKNOWN_ERROR = generalEx(ErrorCode.UNKNOWN_ERROR, "UnKnown Error")
+
+        fun generalEx(errorCode: ErrorCode, message: String): WepinError {
+            return WepinError(errorCode.ordinal, message)
         }
 
         fun generalUnKnownEx(message: String?): WepinError {
-            return WepinError("${WepinPinError.getError(ErrorCode.UNKNOWN_ERROR)} - $message")
+            return WepinError(ErrorCode.UNKNOWN_ERROR.ordinal, message ?: "UnKnown error")
+        }
+
+        // Noti : Webview의 Error Message를 WepinError로 변환
+        fun mapWebviewErrorToWepinError(errorMessage: String): WepinError {
+            return when (errorMessage) {
+                "User Cancel" -> USER_CANCELED
+                "Invalid App Key" -> INVALID_APP_KEY
+                "Invalid Parameter" -> INVALID_PARAMETER
+                "Invalid Login Session" -> INVALID_LOGIN_SESSION
+                "Not Initialized" -> NOT_INITIALIZED_ERROR
+                "Already Initialized" -> ALREADY_INITIALIZED_ERROR
+                "Network Error" -> NOT_CONNECTED_INTERNET
+                "Failed Login" -> FAILED_LOGIN
+                else -> generalUnKnownEx(errorMessage)
+            }
         }
     }
 }

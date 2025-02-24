@@ -34,6 +34,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     private lateinit var wepinLogin: WepinLogin
@@ -143,18 +144,30 @@ class MainActivity : ComponentActivity() {
                     }
                     resources.getString(R.string.item_change_language) -> {
                         wepinPin.changeLanguage("ko").whenComplete{ res, err ->
-                            if (err == null) {
-                                tvResult?.text = String.format(
-                                    " Item : %s\n Result : %s",
-                                    operationItem,
-                                    res
-                                )
-                            } else {
-                                tvResult?.text = String.format(
-                                    " Item : %s\n Error : %s",
-                                    operationItem,
-                                    err
-                                )
+                            runOnUiThread {
+                                if (err == null) {
+                                    tvResult?.text = String.format(
+                                        " Item : %s\n Result : %s",
+                                        operationItem,
+                                        res
+                                    )
+                                } else {
+                                    var errorCode: Int = -1
+                                    var errorMessage: String = ""
+                                    if (err is WepinError) {
+                                        errorCode = err.code
+                                        errorMessage = err.errorMessage ?: "UnKnown Wepin Error"
+                                    } else {
+                                        errorMessage = err.message ?: "UnKnown Error"
+                                    }
+                                    tvResult?.text = String.format(
+                                        Locale.US,
+                                        " Item : %s\n Error Code : %d\n Error Message : %s",
+                                        operationItem,
+                                        errorCode,
+                                        errorMessage
+                                    )
+                                }
                             }
                         }
                     }
@@ -178,21 +191,37 @@ class MainActivity : ComponentActivity() {
                             return@OnItemClickListener
                         }
                         wepinPin.generateRegistrationPINBlock().whenComplete { res, err ->
-                            if (err == null) {
-                                registerPin = RegistrationPinBlock(uvd = res!!.uvd, hint = res!!.hint)
-                                println("registerPin.uvd : ${registerPin!!.uvd}")
-                                println("registerPin.hint : ${registerPin!!.hint}")
-                                tvResult?.text = String.format(
-                                    " Item : %s\n Result : %s",
-                                    operationItem,
-                                    res
-                                )
-                            } else {
-                                tvResult?.text = String.format(
-                                    " Item : %s\n Error : %s",
-                                    operationItem,
-                                    err
-                                )
+                            runOnUiThread {
+                                if (err == null) {
+                                    registerPin = RegistrationPinBlock(uvd = res!!.uvd, hint = res!!.hint)
+                                    println("registerPin.uvd : ${registerPin!!.uvd}")
+                                    println("registerPin.hint : ${registerPin!!.hint}")
+                                    tvResult?.text = String.format(
+                                        " Item : %s\n Result : %s",
+                                        operationItem,
+                                        res
+                                    )
+                                } else {
+                                    var errorCode: Int = -1
+                                    var errorMessage: String = ""
+                                    if (err is WepinError) {
+                                        errorCode = err.code
+                                        errorMessage = err.errorMessage ?: "UnKnown Wepin Error"
+                                        if( err == WepinError.USER_CANCELED ){
+                                            // Noti : 사용자가 PIN 입력을 취소한 경우에 대한 처리
+                                            Log.e("MainActivity", "User canceled PIN input")
+                                        }
+                                    } else {
+                                        errorMessage = err.message ?: "UnKnown Error"
+                                    }
+                                    tvResult?.text = String.format(
+                                        Locale.US,
+                                        " Item : %s\n Error Code : %d\n Error Message : %s",
+                                        operationItem,
+                                        errorCode,
+                                        errorMessage
+                                    )
+                                }
                             }
                         }
 
@@ -281,19 +310,35 @@ class MainActivity : ComponentActivity() {
                             return@OnItemClickListener
                         }
                         wepinPin.generateAuthPINBlock().whenComplete { res, err ->
-                            if (err == null) {
-                                authPin = AuthPinBlock(uvdList = res!!.uvdList, otp = res!!.otp)
-                                tvResult?.text = String.format(
-                                    " Item : %s\n Result : %s",
-                                    operationItem,
-                                    res
-                                )
-                            } else {
-                                tvResult?.text = String.format(
-                                    " Item : %s\n Error : %s",
-                                    operationItem,
-                                    err
-                                )
+                            runOnUiThread {
+                                if (err == null) {
+                                    authPin = AuthPinBlock(uvdList = res!!.uvdList, otp = res!!.otp)
+                                    tvResult?.text = String.format(
+                                        " Item : %s\n Result : %s",
+                                        operationItem,
+                                        res
+                                    )
+                                } else {
+                                    var errorCode: Int = -1
+                                    var errorMessage: String = ""
+                                    if (err is WepinError) {
+                                        errorCode = err.code
+                                        errorMessage = err.errorMessage ?: "UnKnown Wepin Error"
+                                        if( err == WepinError.USER_CANCELED ){
+                                            // Noti : 사용자가 PIN 입력을 취소한 경우에 대한 처리
+                                            Log.e("MainActivity", "User canceled PIN input")
+                                        }
+                                    } else {
+                                        errorMessage = err.message ?: "UnKnown Error"
+                                    }
+                                    tvResult?.text = String.format(
+                                        Locale.US,
+                                        " Item : %s\n Error Code : %d\n Error Message : %s",
+                                        operationItem,
+                                        errorCode,
+                                        errorMessage
+                                    )
+                                }
                             }
                         }
                     }
@@ -372,19 +417,35 @@ class MainActivity : ComponentActivity() {
                             return@OnItemClickListener
                         }
                         wepinPin.generateAuthPINBlock().whenComplete { res, err ->
-                            if (err == null) {
-                                authPin = AuthPinBlock(uvdList = res!!.uvdList, otp = res!!.otp)
-                                tvResult?.text = String.format(
-                                    " Item : %s\n Result : %s",
-                                    operationItem,
-                                    res
-                                )
-                            } else {
-                                tvResult?.text = String.format(
-                                    " Item : %s\n Error : %s",
-                                    operationItem,
-                                    err
-                                )
+                            runOnUiThread {
+                                if (err == null) {
+                                    authPin = AuthPinBlock(uvdList = res!!.uvdList, otp = res!!.otp)
+                                    tvResult?.text = String.format(
+                                        " Item : %s\n Result : %s",
+                                        operationItem,
+                                        res
+                                    )
+                                } else {
+                                    var errorCode: Int = -1
+                                    var errorMessage: String = ""
+                                    if (err is WepinError) {
+                                        errorCode = err.code
+                                        errorMessage = err.errorMessage ?: "UnKnown Wepin Error"
+                                        if( err == WepinError.USER_CANCELED ){
+                                            // Noti : 사용자가 PIN 입력을 취소한 경우에 대한 처리
+                                            Log.e("MainActivity", "User canceled PIN input")
+                                        }
+                                    } else {
+                                        errorMessage = err.message ?: "UnKnown Error"
+                                    }
+                                    tvResult?.text = String.format(
+                                        Locale.US,
+                                        " Item : %s\n Error Code : %d\n Error Message : %s",
+                                        operationItem,
+                                        errorCode,
+                                        errorMessage
+                                    )
+                                }
                             }
                         }
                     }
@@ -483,20 +544,38 @@ class MainActivity : ComponentActivity() {
                             return@OnItemClickListener
                         }
                         wepinPin.generateAuthPINBlock(3).whenComplete { res, err ->
-                            if (err == null) {
-                                authPin = AuthPinBlock(uvdList = res!!.uvdList, otp = res!!.otp)
-                                tvResult?.text = String.format(
-                                    " Item : %s\n Result : %s",
-                                    operationItem,
-                                    res
-                                )
-                            } else {
-                                tvResult?.text = String.format(
-                                    " Item : %s\n Error : %s",
-                                    operationItem,
-                                    err
-                                )
+                            runOnUiThread {
+                                if (err == null) {
+                                    authPin = AuthPinBlock(uvdList = res!!.uvdList, otp = res!!.otp)
+                                    tvResult?.text = String.format(
+                                        " Item : %s\n Result : %s",
+                                        operationItem,
+                                        res
+                                    )
+                                } else {
+                                    var errorCode: Int = -1
+                                    var errorMessage: String = ""
+                                    if (err is WepinError) {
+                                        errorCode = err.code
+                                        errorMessage = err.errorMessage ?: "UnKnown Wepin Error"
+                                        if( err == WepinError.USER_CANCELED ){
+                                            // Noti : 사용자가 PIN 입력을 취소한 경우에 대한 처리
+                                            Log.e("MainActivity", "User canceled PIN input")
+                                        }
+                                    } else {
+                                        errorMessage = err.message ?: "UnKnown Error"
+                                    }
+                                    tvResult?.text = String.format(
+                                        Locale.US,
+                                        " Item : %s\n Error Code : %d\n Error Message : %s",
+                                        operationItem,
+                                        errorCode,
+                                        errorMessage
+                                    )
+                                }
+
                             }
+
                         }
                     }
 
@@ -578,19 +657,35 @@ class MainActivity : ComponentActivity() {
 
                     resources.getString(R.string.item_gen_change_pin_block) -> {
                         wepinPin.generateChangePINBlock().whenComplete { res, err ->
-                            if (err == null) {
-                                changePin = ChangePinBlock(uvd = res!!.uvd, newUVD = res.newUVD, hint = res.hint, otp = res.otp)
-                                tvResult?.text = String.format(
-                                    " Item : %s\n Result : %s",
-                                    operationItem,
-                                    res
-                                )
-                            } else {
-                                tvResult?.text = String.format(
-                                    " Item : %s\n Error : %s",
-                                    operationItem,
-                                    err
-                                )
+                            runOnUiThread {
+                                if (err == null) {
+                                    changePin = ChangePinBlock(uvd = res!!.uvd, newUVD = res.newUVD, hint = res.hint, otp = res.otp)
+                                    tvResult?.text = String.format(
+                                        " Item : %s\n Result : %s",
+                                        operationItem,
+                                        res
+                                    )
+                                } else {
+                                    var errorCode: Int = -1
+                                    var errorMessage: String = ""
+                                    if (err is WepinError) {
+                                        errorCode = err.code
+                                        errorMessage = err.errorMessage ?: "UnKnown Wepin Error"
+                                        if( err == WepinError.USER_CANCELED ){
+                                            // Noti : 사용자가 PIN 입력을 취소한 경우에 대한 처리
+                                            Log.e("MainActivity", "User canceled PIN input")
+                                        }
+                                    } else {
+                                        errorMessage = err.message ?: "UnKnown Error"
+                                    }
+                                    tvResult?.text = String.format(
+                                        Locale.US,
+                                        " Item : %s\n Error Code : %d\n Error Message : %s",
+                                        operationItem,
+                                        errorCode,
+                                        errorMessage
+                                    )
+                                }
                             }
                         }
                     }
@@ -660,31 +755,55 @@ class MainActivity : ComponentActivity() {
 
                     resources.getString(R.string.item_gen_auth_otp_code) -> {
                         wepinPin.generateAuthOTPCode().whenComplete { res, err ->
-                            if (err == null) {
-                                authOTPCode = AuthOTP(res!!.code)
-                                tvResult?.text = String.format(
-                                    " Item : %s\n Result : %s",
-                                    operationItem,
-                                    res
-                                )
-                            } else {
-                                tvResult?.text = String.format(
-                                    " Item : %s\n Error : %s",
-                                    operationItem,
-                                    err
-                                )
+                            runOnUiThread {
+                                if (err == null) {
+                                    authOTPCode = AuthOTP(res!!.code)
+                                    tvResult?.text = String.format(
+                                        " Item : %s\n Result : %s",
+                                        operationItem,
+                                        res
+                                    )
+                                } else {
+                                    var errorCode: Int = -1
+                                    var errorMessage: String = ""
+                                    if (err is WepinError) {
+                                        errorCode = err.code
+                                        errorMessage = err.errorMessage ?: "UnKnown Wepin Error"
+                                        if( err == WepinError.USER_CANCELED ){
+                                            // Noti : 사용자가 PIN 입력을 취소한 경우에 대한 처리
+                                            Log.e("MainActivity", "User canceled PIN input")
+                                        }
+                                    } else {
+                                        errorMessage = err.message ?: "UnKnown Error"
+                                    }
+                                    tvResult?.text = String.format(
+                                        Locale.US,
+                                        " Item : %s\n Error Code : %d\n Error Message : %s",
+                                        operationItem,
+                                        errorCode,
+                                        errorMessage
+                                    )
+                                }
                             }
                         }
                     }
 
                     resources.getString(R.string.item_finalize) -> {
-						wepinLogin.finalize()
-                        wepinPin.finalize()
-                        tvResult?.text = String.format(
-                            " Item : %s\n Result : %s",
-                            operationItem,
-                            "Success"
-                        )
+                        try {
+                            wepinLogin.finalize()
+                            wepinPin.finalize()
+                            tvResult?.text = String.format(
+                                " Item : %s\n Result : %s",
+                                operationItem,
+                                "Success"
+                            )
+                        }catch (e: Exception) {
+                            tvResult?.text = String.format(
+                                " Item : %s\n Result : %s",
+                                operationItem,
+                                e.message
+                            )
+                        }
                     }
                     // End Test With pinLibrary
                 }

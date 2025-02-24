@@ -107,7 +107,7 @@ class JSProcessor {
 //                        headerObject.getString("request_from"),
 //                        command
 //                    ).build()
-                    WepinPinManager.getInstance().finalizeWebivew()
+                    WepinPinManager.getInstance().finalizeWebview()
 
                 }
                 // CMD_GET_SDK_REQUEST 에 요청했던 command에 대한 웹뷰 응답처리

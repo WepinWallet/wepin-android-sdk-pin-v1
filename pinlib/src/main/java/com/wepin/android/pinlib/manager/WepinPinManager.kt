@@ -13,6 +13,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.wepin.android.pinlib.error.WepinError
+import com.wepin.android.pinlib.error.WepinError.Companion.mapWebviewErrorToWepinError
 import com.wepin.android.pinlib.network.WepinNetworkManager
 import com.wepin.android.pinlib.types.KeyType
 import com.wepin.android.pinlib.types.WepinPinAttributes
@@ -20,6 +21,7 @@ import com.wepin.android.pinlib.utils.Log
 import com.wepin.android.pinlib.utils.getVersionMetaDataValue
 import com.wepin.android.pinlib.webview.JSProcessor
 import kotlinx.coroutines.CompletableDeferred
+import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
 
 class WepinPinManager() {
@@ -123,11 +125,11 @@ class WepinPinManager() {
         _webViewUrl = when (KeyType.fromAppKey(_appKey!!)) {
             KeyType.DEV -> {
                 "https://dev-v1-widget.wepin.io/"
-                //"https://192.168.0.89:8989/"
+                //"http://192.168.0.89:8989/"
             }
 
             KeyType.STAGE -> {
-                "http://stage-v1-widget.wepin.io/"
+                "https://stage-v1-widget.wepin.io/"
             }
 
             KeyType.PROD -> {
@@ -171,14 +173,21 @@ class WepinPinManager() {
         return _webView!!
     }
 
-    fun finalizeWebivew(){
-        Log.i(TAG, "finalizeWebivew")
+    fun finalizeWebview() {
+        Log.i(TAG, "finalizeWebview")
+
         val handler = Handler(Looper.getMainLooper())
         handler.post {
-            _webView!!.destroy()
-            _wepinWebviewDialog!!.dismiss()
-            _webView = null
-            _wepinWebviewDialog = null
+            try {
+                _webView?.destroy()
+                _wepinWebviewDialog?.dismiss()
+
+                _webView = null
+                _wepinWebviewDialog = null
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -217,9 +226,18 @@ class WepinPinManager() {
                 try {
                     val result = _responseDeferred!!.getCompleted()
                     Log.d(TAG, "_responseDeferred result : $result")
-                    completableFuture.complete(result)
+                    val jsonResult = JSONObject(result)
+                    val state = jsonResult.getJSONObject("body").getString("state")
+
+                    if (state.equals("ERROR", true)) {
+                        val errorMessage = jsonResult.getJSONObject("body").optString("data", "UnKnown error")
+                        val mappedError = mapWebviewErrorToWepinError(errorMessage)
+                        completableFuture.completeExceptionally(mappedError)
+                    } else {
+                        completableFuture.complete(result)
+                    }
                 } catch (e: Exception) {
-                    Log.e(TAG, "Error occurred: ${e.message}")
+                    Log.e(TAG, "Exception occurred: ${e.message}")
                     completableFuture.completeExceptionally(e)
                 }
             }

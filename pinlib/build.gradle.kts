@@ -4,7 +4,7 @@ plugins {
     id("maven-publish")
 }
 
-extra["libraryVersion"] = "0.0.2"
+extra["libraryVersion"] = "0.0.3"
 
 android {
     namespace = "com.wepin.android.pinlib"

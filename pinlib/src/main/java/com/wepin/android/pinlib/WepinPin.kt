@@ -132,10 +132,14 @@ class WepinPin(wepinPinParams: WepinPinParams) {
                 }
             }
             .exceptionally { e ->
-                completableFuture.completeExceptionally(WepinError.generalUnKnownEx(e.message))
+                val actualError = if (e.cause is WepinError) {
+                    e.cause as WepinError
+                } else {
+                    WepinError.generalUnKnownEx(e.cause?.message ?: e.message)
+                }
+                completableFuture.completeExceptionally(actualError)
                 null
             }
-
         return completableFuture
     }
 
@@ -169,7 +173,12 @@ class WepinPin(wepinPinParams: WepinPinParams) {
                 }
             }
             .exceptionally { e ->
-                completableFuture.completeExceptionally(WepinError.generalUnKnownEx(e.message))
+                val actualError = if (e.cause is WepinError) {
+                    e.cause as WepinError
+                } else {
+                    WepinError.generalUnKnownEx(e.cause?.message ?: e.message)
+                }
+                completableFuture.completeExceptionally(actualError)
                 null
             }
 
@@ -202,7 +211,12 @@ class WepinPin(wepinPinParams: WepinPinParams) {
                 }
             }
             .exceptionally { e ->
-                completableFuture.completeExceptionally(WepinError.generalUnKnownEx(e.message))
+                val actualError = if (e.cause is WepinError) {
+                    e.cause as WepinError
+                } else {
+                    WepinError.generalUnKnownEx(e.cause?.message ?: e.message)
+                }
+                completableFuture.completeExceptionally(actualError)
                 null
             }
 
@@ -235,7 +249,12 @@ class WepinPin(wepinPinParams: WepinPinParams) {
                 }
             }
             .exceptionally { e ->
-                completableFuture.completeExceptionally(WepinError.generalUnKnownEx(e.message))
+                val actualError = if (e.cause is WepinError) {
+                    e.cause as WepinError
+                } else {
+                    WepinError.generalUnKnownEx(e.cause?.message ?: e.message)
+                }
+                completableFuture.completeExceptionally(actualError)
                 null
             }
 
@@ -255,7 +274,7 @@ class WepinPin(wepinPinParams: WepinPinParams) {
         val state = jsonResult.getJSONObject("body").getString("state")
 
         return if (command == subCommand) {
-            if (state == "SUCCESS") {
+            if (state.equals("SUCCESS", true)) {
                 true
             } else {
                 val data = jsonResult.getJSONObject("body").getString("data")
@@ -332,3 +351,4 @@ class WepinPin(wepinPinParams: WepinPinParams) {
         return list
     }
 }
+

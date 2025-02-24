@@ -12,7 +12,7 @@ class StorageDataTypeAdapter : JsonDeserializer<StorageDataType> {
     private val TAG = this.javaClass.name
 
     override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): StorageDataType {
-        Log.i(TAG,"deserialize")
+        //Log.i(TAG,"deserialize")
         val jsonObject = json.asJsonObject
 
         return when {

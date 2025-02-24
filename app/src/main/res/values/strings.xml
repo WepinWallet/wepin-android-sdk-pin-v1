@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Wepin SDK V1 Sample</string>
+    <string name="app_name">Sample PinPad</string>
     <string name="result">Result</string>
     <string name="default_result">Your long text goes here…</string>
 

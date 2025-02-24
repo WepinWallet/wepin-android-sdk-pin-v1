@@ -144,7 +144,7 @@ class Network(private val appKey: String, private val context: Context) {
         headers["X-API-KEY"] = appKey
         headers["X-API-DOMAIN"] = (context as Activity).packageName
         headers["X-SDK-TYPE"] = "android-rest-api"
-        headers["X-SDK-VERSION"] = "0.0.1" // Wepin Pin Pad Library Version
+        headers["X-SDK-VERSION"] = "0.0.3" // Wepin Pin Pad Library Version
         accessToken?.let {
             headers["Authorization"] = "Bearer $it"
         }

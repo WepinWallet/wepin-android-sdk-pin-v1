@@ -3,7 +3,7 @@ package com.wepin.android.pinlib.webview
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.wepin.android.pinlib.error.WepinError
 import com.wepin.android.pinlib.manager.WepinPinManager
-import com.wepin.android.pinlib.storage.StorageManager
+import com.wepin.android.pinlib.storage.WepinStorageManager
 import com.wepin.android.pinlib.types.Command
 import com.wepin.android.pinlib.utils.Log
 import com.wepin.android.pinlib.utils.convertJsonToLocalStorageData
@@ -37,7 +37,7 @@ class JSProcessor {
                     val type = "android-pin"
                     val version = WepinPinManager.getInstance().getVersion()
                     val attributes = WepinPinManager.getInstance().getWepinAttributes()
-                    var storageData = StorageManager.getAllStorage()
+                    var storageData = WepinStorageManager.getAllStorage()
                     jsResponse = JSResponse.Builder(
                         headerObject.getString("id"),
                         headerObject.getString("request_from"),
@@ -50,7 +50,7 @@ class JSProcessor {
                             platform = platform,
                             type = type,
                             version = version!!,
-                            localData = storageData,
+                            localData = storageData ?: {},
                             attributes = attributes
                         ).build()
                 }
@@ -89,7 +89,7 @@ class JSProcessor {
                             storageDataMap[key] = storageValue
                         }
 
-                        StorageManager.setAllStorage(storageDataMap)
+                        WepinStorageManager.setAllStorage(storageDataMap)
                         jsResponse = JSResponse.Builder(headerObject.getString("id"),
                             headerObject.getString("request_from"),
                             command).build()

@@ -13,6 +13,9 @@
 
 # Wepin Android SDK PIN Pad Library v1
 
+[![platform - android](https://img.shields.io/badge/platform-Android-3ddc84.svg?logo=android&style=for-the-badge)](https://www.android.com/)
+[![SDK Version](https://img.shields.io/jitpack/version/com.github.WepinWallet/wepin-android-sdk-pin-v1.svg?logo=jitpack&style=for-the-badge)](https://jitpack.io/v/com.github.WepinWallet/wepin-android-sdk-pin-v1)
+
 Wepin Pin Pad library for Android. This package is exclusively available for use in Android environments.
 
 ## ⏩ Get App ID and Key
@@ -24,6 +27,32 @@ After signing up for [Wepin Workspace](https://workspace.wepin.io/), navigate to
 - **Android**: API version **24** or newer is required.
 
 ## ⏩ Install
+
+> ⚠️ Important Notice for v1.0.0 Update
+>
+> 🚨 Breaking Changes & Migration Guide 🚨
+>
+> This update includes major changes that may impact your app. Please read the following carefully before updating.
+>
+> 🔄 Storage Migration
+> •    In rare cases, stored data may become inaccessible due to key changes.
+> •    Starting from v1.0.0, if the key is invalid, stored data will be cleared, and a new key will be generated automatically.
+> •    Existing data will remain accessible unless a key issue is detected, in which case a reset will occur.
+> •    ⚠️ Downgrading to an older version after updating to v1.0.0 may prevent access to previously stored data.
+> •    Recommended: Backup your data before updating to avoid any potential issues.
+
+
+> 🔧 How to Disable Backup (Android)
+>
+> Modify your AndroidManifest.xml file:
+>
+>    ```xml
+>    <application
+>        android:allowBackup="false"
+>        android:fullBackupContent="false">
+>    ```
+> 🔹 If android:allowBackup is true, the migration process may not work correctly, leading to potential data loss or storage issues.
+> 
 1. Add JitPack repository in your project-level build gradle file
  - kts
    ```kotlin

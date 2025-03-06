@@ -170,6 +170,7 @@ class Network(private val appKey: String, private val context: Context) {
         if (method == "POST" || method == "PATCH") {
             connection.doOutput = true
             body?.let {
+                //println("yskim_test Request Body: $it")
                 connection.outputStream.write(it.toByteArray())
             }
         }
@@ -195,6 +196,13 @@ class Network(private val appKey: String, private val context: Context) {
     }
 
     inline fun <reified T> postRequest(url: String, body: String, headers: Map<String, String>): T {
+//        // Noti : for debug
+//        val gson = Gson()
+//        // 요청 헤더 및 바디를 JSON 형식으로 변환 후 출력
+//        val headersJson = gson.toJson(headers)
+//        println("yskim_test Request Headers: $headersJson")
+//        println("yskim_test Request Body: $body")
+//        // for debug end
         return httpRequest(url, "POST", headers, body)
     }
 

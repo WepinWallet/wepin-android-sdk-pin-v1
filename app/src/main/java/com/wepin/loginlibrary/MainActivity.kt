@@ -822,50 +822,67 @@ class MainActivity : ComponentActivity() {
             res?.whenComplete { infResponse, error ->
                 if (error == null || (error is WepinError && error == WepinError.ALREADY_INITIALIZED_ERROR)) {
                     // 구글 Oauth idtoken 로그인 후 위핀 로그인 수행
+                    wepinLogin.getCurrentWepinUser().whenComplete { currentUser, currentUserError ->
 
-                    val loginOption = LoginOauth2Params(
-                        provider = "google",
-                        clientId = getString(R.string.default_google_web_client_id),
-                    )
+                        if (currentUserError != null || currentUser == null) {
+                            val loginOption = LoginOauth2Params(
+                                provider = "google",
+                                clientId = getString(R.string.default_google_web_client_id),
+                            )
 
-                    wepinLogin.loginWithOauthProvider(loginOption).whenComplete { loginResponse, loginError ->
-                        if (loginError == null) {
-                            // 로그인 성공 시 처리
+                            wepinLogin.loginWithOauthProvider(loginOption)
+                                .whenComplete { loginResponse, loginError ->
+                                    if (loginError == null) {
+                                        // 로그인 성공 시 처리
 
-                            val sign = wepinLogin.getSignForLogin(resources.getString(R.string.wepin_app_private_key), loginResponse.token)
-                            val idTokenRequest = LoginOauthIdTokenRequest(loginResponse.token, sign)
-                            wepinLogin.loginWithIdToken(idTokenRequest).whenComplete { idTokenResponse, idTokenError ->
-                                if (idTokenError == null) {
-                                    // ID 토큰 로그인 성공 시 처리
-                                    println(idTokenResponse)
-                                    loginResult = idTokenResponse
-                                    // 위핀 로그인 호출
-                                    wepinLogin.loginWepin(loginResult!!).whenComplete { wepinResponse, wepinError ->
-                                        loginResult = null
+                                        val sign = wepinLogin.getSignForLogin(
+                                            resources.getString(R.string.wepin_app_private_key),
+                                            loginResponse.token
+                                        )
+                                        val idTokenRequest =
+                                            LoginOauthIdTokenRequest(loginResponse.token, sign)
+                                        wepinLogin.loginWithIdToken(idTokenRequest)
+                                            .whenComplete { idTokenResponse, idTokenError ->
+                                                if (idTokenError == null) {
+                                                    // ID 토큰 로그인 성공 시 처리
+                                                    loginResult = idTokenResponse
+                                                    // 위핀 로그인 호출
+                                                    wepinLogin.loginWepin(loginResult!!)
+                                                        .whenComplete { wepinResponse, wepinError ->
+                                                            loginResult = null
 
-                                        if (wepinError == null) {
-                                            tvResult?.text = String.format(
-                                                " Item : %s\n Result : %s",
-                                                operationItem,
-                                                wepinResponse
-                                            )
-                                            wepinUser = wepinResponse
-                                        } else {
-                                            tvResult?.text = String.format(
-                                                " Item : %s\n Result : %s",
-                                                operationItem,
-                                                "fail: ${wepinError.message}"
-                                            )
-                                        }
+                                                            if (wepinError == null) {
+                                                                tvResult?.text = String.format(
+                                                                    " Item : %s\n Result : %s",
+                                                                    operationItem,
+                                                                    wepinResponse
+                                                                )
+                                                                wepinUser = wepinResponse
+                                                            } else {
+                                                                tvResult?.text = String.format(
+                                                                    " Item : %s\n Result : %s",
+                                                                    operationItem,
+                                                                    "fail: ${wepinError.message}"
+                                                                )
+                                                            }
+                                                        }
+                                                } else {
+                                                    println("ID Token login error - ${idTokenError.message}")
+                                                    // 에러 UI 처리
+                                                }
+                                            }
+                                    } else {
+                                        println("Oauth Provider login error - ${loginError.message}")
+                                        // 에러 UI 처리
                                     }
-                                } else {
-                                    println("ID Token login error - ${idTokenError.message}")
-                                    // 에러 UI 처리
                                 }
-                            }
                         } else {
-                            println("Oauth Provider login error - ${loginError.message}")
-                            // 에러 UI 처리
+                            tvResult?.text = String.format(
+                                " Item : %s\n Result : %s",
+                                operationItem,
+                                currentUser
+                            )
+                            wepinUser = currentUser
                         }
                     }
                 } else {

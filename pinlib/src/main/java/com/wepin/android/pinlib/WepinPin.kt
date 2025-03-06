@@ -6,7 +6,7 @@ import android.content.Context
 import com.wepin.android.pinlib.error.WepinError
 import com.wepin.android.pinlib.manager.WepinPinManager
 import com.wepin.android.pinlib.network.WepinNetworkManager
-import com.wepin.android.pinlib.storage.StorageManager
+import com.wepin.android.pinlib.storage.WepinStorageManager
 import com.wepin.android.pinlib.types.AuthOTP
 import com.wepin.android.pinlib.types.AuthPinBlock
 import com.wepin.android.pinlib.types.ChangePinBlock
@@ -45,7 +45,7 @@ class WepinPin(wepinPinParams: WepinPinParams) {
 
         try {
             _attributes = attributes
-            StorageManager.init(_appContext as Activity, _appId!!)
+            WepinStorageManager.init(_appContext as Activity, _appId!!)
 
             // Wepin PinManager 초기화
             _wepinPinManager.init(_appContext!!, _appKey!!, _appId!!, _attributes)
@@ -291,15 +291,15 @@ class WepinPin(wepinPinParams: WepinPinParams) {
     private fun checkExistWepinLoginSession(): CompletableFuture<Boolean> {
         Log.i(TAG, "checkExistWepinLoginSession")
         val wepinCompletableFuture = CompletableFuture<Boolean>()
-        val token = StorageManager.getStorage("wepin:connectUser")
-        val userId = StorageManager.getStorage("user_id")
+        val token = WepinStorageManager.getStorage<StorageDataType>("wepin:connectUser")
+        val userId = WepinStorageManager.getStorage<String>("user_id")
 
         if (token != null && userId != null) {
             val wepinToken = token as StorageDataType.WepinToken
             _wepinNetworkManager?.setAuthToken(wepinToken.accessToken, wepinToken.refreshToken)
             _wepinNetworkManager?.getAccessToken(userId as String)
                 ?.thenApply { response ->
-                    StorageManager.setStorage(
+                    WepinStorageManager.setStorage<StorageDataType>(
                         "wepin:connectUser",
                         StorageDataType.WepinToken(
                             accessToken = response,

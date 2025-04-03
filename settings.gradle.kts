@@ -15,6 +15,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Wepin SDK V1 Sample"
-include(":app")
-include(":pinlib")
-//include(":loginlib")
+include(":sample")
+include(":pinLib")

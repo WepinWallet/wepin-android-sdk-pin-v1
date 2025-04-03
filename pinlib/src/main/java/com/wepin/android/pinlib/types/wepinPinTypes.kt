@@ -9,8 +9,10 @@ data class EncUVD(
         fun fromJson(json: Map<String, Any?>): EncUVD {
             return EncUVD(
                 seqNum = (json["seqNum"] as? Number)?.toInt(),  // Number로 받아 Int로 변환
-                b64SKey = json["b64SKey"] as? String ?: throw IllegalArgumentException("b64SKey is required"),
-                b64Data = json["b64Data"] as? String ?: throw IllegalArgumentException("b64Data is required")
+                b64SKey = json["b64SKey"] as? String
+                    ?: throw IllegalArgumentException("b64SKey is required"),
+                b64Data = json["b64Data"] as? String
+                    ?: throw IllegalArgumentException("b64Data is required")
             )
         }
     }
@@ -36,8 +38,10 @@ data class EncPinHint(
     companion object {
         fun fromJson(json: Map<String, Any?>): EncPinHint {
             return EncPinHint(
-                version = (json["version"] as? Number)?.toInt() ?: throw IllegalArgumentException("version is required"),
-                length = json["length"] as? String ?: throw IllegalArgumentException("length is required"),
+                version = (json["version"] as? Number)?.toInt()
+                    ?: throw IllegalArgumentException("version is required"),
+                length = json["length"] as? String
+                    ?: throw IllegalArgumentException("length is required"),
                 data = json["data"] as? String ?: throw IllegalArgumentException("data is required")
             )
         }

@@ -1,10 +1,12 @@
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
     id("maven-publish")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.jetbrains.kotlin.android)
+//    alias(libs.plugins.maven.publish)
 }
 
-extra["libraryVersion"] = "1.0.0"
+val sdkVersion = project.findProperty("wepinAndroidSdkVersion") ?: "LOCAL-SNAPSHOT"
+rootProject.extra["wepinAndroidSdkVersion"] = sdkVersion
 
 android {
     namespace = "com.wepin.android.pinlib"
@@ -12,7 +14,11 @@ android {
 
     defaultConfig {
         minSdk = 24
-        buildConfigField("String", "LIBRARY_VERSION", "\"${project.extra["libraryVersion"]}\"")
+        buildConfigField(
+            "String",
+            "LIBRARY_VERSION",
+            "\"${rootProject.extra["wepinAndroidSdkVersion"]}\""
+        )
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -30,17 +36,6 @@ android {
             )
         }
     }
-
-    libraryVariants.all {
-        outputs.all {
-            val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            output.outputFileName = when (name) {
-                "release" -> "wepin-login-v${project.extra["libraryVersion"]}.aar"
-                "debug" -> "debug-wepin-login-v${project.extra["libraryVersion"]}.aar"
-                else -> throw IllegalArgumentException("Unsupported build variant: $name")
-            }
-        }
-    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -51,57 +46,65 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.9.0")
+    //Wepin
+//    api(project(":libs:common:commonLib"))
+//    implementation(project(":libs:modal:modalLib"))
+//    implementation(project(":libs:network:networkLib"))
+//    implementation(project(":libs:storage:storageLib"))
+//    implementation(project(":libs:session:sessionLib"))
+//    api(project(":libs:login:loginLib"))
 
-    // ECDSA
-    implementation ("org.bitcoinj:bitcoinj-core:0.15.10")
+    api("io.wepin:wepin-android-sdk-common-v1:${sdkVersion}")
+    implementation("io.wepin:wepin-android-sdk-network-v1:${sdkVersion}")
+    implementation("io.wepin:wepin-android-sdk-modal-v1:${sdkVersion}")
+    implementation("io.wepin:wepin-android-sdk-storage-v1:${sdkVersion}")
+    implementation("io.wepin:wepin-android-sdk-session-v1:${sdkVersion}")
+    api("com.github.WepinWallet:wepin-android-sdk-login-v1:v1.1.0-test2")
 
-    // Encoding
-    implementation ("com.google.code.gson:gson:2.9.1")
-
-    // AppAuth
-    implementation ("net.openid:appauth:0.11.1")
-
-    // Encrypted Storage
-    implementation ("androidx.security:security-crypto-ktx:1.1.0-alpha03")
-
-    // becrypt
-    implementation ("org.mindrot:jbcrypt:0.4")
-
-    // Volley
-    implementation ("com.android.volley:volley:1.2.1")
-
-    // JWT decode
-    implementation ("com.auth0:java-jwt:3.18.2")
-    implementation("androidx.window:window:1.3.0")
-
-
-    // Jackson Databind for JSON serialization/deserialization
-    implementation ("com.fasterxml.jackson.core:jackson-databind:2.15.2")
-
-    // Jackson Annotations
-    implementation ("com.fasterxml.jackson.core:jackson-annotations:2.15.2")
-
-    // Jackson Kotlin module
-    implementation ("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
-
-
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            register<MavenPublication>("release") {
-                from(components["release"])
-                groupId = "com.github.WepinWallet"
-                artifactId = "wepin-android-sdk-pin-v1"
-            }
-        }
-    }
-}
-
+//mavenPublishing {
+////    publishToMavenCentral(SonatypeHost.DEFAULT)
+//    // or when publishing to https://s01.oss.sonatype.org
+////    publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
+//    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
+//
+//    signAllPublications()
+//    coordinates(
+//        "io.wepin",
+//        "wepin-android-sdk-pin-v1",
+//        "${rootProject.extra["wepinAndroidSdkVersion"]}"
+//    )
+//
+//    pom {
+//        name.set(project.name)
+//        description.set("Android common library for Wepin SDK")
+//        inceptionYear.set("2025")
+//        url.set("https://github.com/WepinWallet/wepin-android-sdk-pin-v1")
+//        licenses {
+//            license {
+//                name.set("The Apache License, Version 2.0")
+//                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+//                distribution.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+//            }
+//        }
+//        developers {
+//            developer {
+//                id.set("IoTrust")
+//                name.set("wepin.dev")
+////                url.set("https://github.com/WepinWallet/wepin-android-sdk-login-v1")
+//            }
+//        }
+//        scm {
+////            url.set("https://github.com/WepinWallet/wepin-android-sdk-login-v1/")
+////            connection.set("scm:git:git://github.com/WepinWallet/wepin-android-sdk-login-v1")
+////            developerConnection.set("scm:git:ssh://git@github.com/WepinWallet/wepin-android-sdk-login-v1")
+//        }
+//    }
+//}

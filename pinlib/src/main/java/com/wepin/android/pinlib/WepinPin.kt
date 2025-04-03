@@ -1,90 +1,87 @@
 package com.wepin.android.pinlib
 
-import WepinPinWebviewDialog
-import android.app.Activity
 import android.content.Context
-import com.wepin.android.pinlib.error.WepinError
+import android.util.Log
+import com.wepin.android.commonlib.error.WepinError
+import com.wepin.android.commonlib.types.WepinAttribute
+import com.wepin.android.commonlib.types.WepinLifeCycle
+import com.wepin.android.loginlib.WepinLogin
 import com.wepin.android.pinlib.manager.WepinPinManager
-import com.wepin.android.pinlib.network.WepinNetworkManager
-import com.wepin.android.pinlib.storage.WepinStorageManager
 import com.wepin.android.pinlib.types.AuthOTP
 import com.wepin.android.pinlib.types.AuthPinBlock
 import com.wepin.android.pinlib.types.ChangePinBlock
-import com.wepin.android.pinlib.types.Command
 import com.wepin.android.pinlib.types.EncPinHint
 import com.wepin.android.pinlib.types.EncUVD
 import com.wepin.android.pinlib.types.RegistrationPinBlock
-import com.wepin.android.pinlib.types.StorageDataType
 import com.wepin.android.pinlib.types.WepinPinAttributes
 import com.wepin.android.pinlib.types.WepinPinParams
-import com.wepin.android.pinlib.utils.Log
+import com.wepin.android.pinlib.utils.handleJsonResult
+import com.wepin.android.pinlib.webview.Command
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
 
 class WepinPin(wepinPinParams: WepinPinParams) {
-
     private val TAG = this.javaClass.name
     private var _appContext: Context? = wepinPinParams.context
+    private var _appId: String = wepinPinParams.appId
+    private var _appKey: String = wepinPinParams.appKey
     private var _isInitialized: Boolean = false
-    private var _appId: String? = wepinPinParams.appId
-    private var _appKey: String? = wepinPinParams.appKey
+    private var _attributes: WepinAttribute? = null
     private var _wepinPinManager: WepinPinManager = WepinPinManager.getInstance()
-    private var _attributes: WepinPinAttributes? = null
-    private var _wepinWebviewDialog: WepinPinWebviewDialog? = null
-    private var _wepinNetworkManager: WepinNetworkManager? = null
+
+    var login: WepinLogin? = null
+        get() = _wepinPinManager.loginLib
+        private set // 외부에서 변경 불가능하게 설정
 
     fun initialize(attributes: WepinPinAttributes? = null): CompletableFuture<Boolean> {
-        Log.i(TAG, "init")
+        Log.i(TAG, "initialize")
         val wepinCompletableFuture = CompletableFuture<Boolean>()
 
         if (_isInitialized) {
             wepinCompletableFuture.completeExceptionally(WepinError.ALREADY_INITIALIZED_ERROR)
             return wepinCompletableFuture
         }
+        _attributes = attributes
 
-        try {
-            _attributes = attributes
-            WepinStorageManager.init(_appContext as Activity, _appId!!)
-
-            // Wepin PinManager 초기화
-            _wepinPinManager.init(_appContext!!, _appKey!!, _appId!!, _attributes)
-            _wepinNetworkManager = _wepinPinManager.wepinNewtorkManager
-
-            _wepinNetworkManager?.getAppInfo()
-                ?.thenApply { infoResponse ->
-                    Log.d(TAG, "infoResponse $infoResponse")
-
+        _wepinPinManager.initialize(
+            wepinPinParams = WepinPinParams(
+                _appContext!!,
+                _appId,
+                _appKey
+            ),
+            attributes = attributes
+        ).thenCompose {
+            _wepinPinManager.wepinNetwork?.let { network ->
+                network.getAppInfo().thenApply { infoResponse ->
                     if (!infoResponse) {
-                        _isInitialized = false
                         wepinCompletableFuture.complete(false)
-                        return@thenApply false
-                    }
-
-                    checkExistWepinLoginSession().thenApply {}
-
-                    val activity = _appContext as? Activity ?: run {
                         _isInitialized = false
-                        wepinCompletableFuture.completeExceptionally(WepinError.NOT_ACTIVITY)
+
                         return@thenApply false
                     }
 
-                    _wepinWebviewDialog = WepinPinWebviewDialog(activity, _wepinPinManager.getWebView())
+                    login?.init()?.exceptionally { error ->
+                        Log.e(TAG, "$error")
+                        null
+                    }?.thenApply {
+                        _wepinPinManager.wepinSessionManager?.checkLoginStatusAndGetLifeCycle()
+                            ?.thenApply { }
+                    }
 
                     _isInitialized = true
                     wepinCompletableFuture.complete(true)
                     true
-                }?.exceptionally { throwable ->
+                }?.exceptionally { error ->
                     _isInitialized = false
-                    wepinCompletableFuture.completeExceptionally(throwable)
+                    wepinCompletableFuture.completeExceptionally(error)
                     null
                 }
-        } catch (e: Exception) {
+            }
+        }?.exceptionally { error ->
             _isInitialized = false
-            e.printStackTrace()
-            wepinCompletableFuture.completeExceptionally(e)
+            wepinCompletableFuture.completeExceptionally(error)
         }
-
         return wepinCompletableFuture
     }
 
@@ -95,11 +92,13 @@ class WepinPin(wepinPinParams: WepinPinParams) {
 
     fun changeLanguage(language: String): CompletableFuture<Boolean> {
         Log.i(TAG, "changeLanguage")
-        val completableFuture = CompletableFuture<Boolean>()
+        val completableFuture: CompletableFuture<Boolean> = CompletableFuture()
+
         if (!_isInitialized) {
             completableFuture.completeExceptionally(WepinError.NOT_INITIALIZED_ERROR)
             return completableFuture
         }
+
         _attributes?.defaultLanguage = language
         completableFuture.complete(true)
         return completableFuture
@@ -115,36 +114,37 @@ class WepinPin(wepinPinParams: WepinPinParams) {
             return completableFuture
         }
 
-        checkExistWepinLoginSession()
-            .thenCompose { sessionExists ->
-                if (sessionExists) {
-                    _wepinPinManager.openAndRequestWepinWidgetAsync(subCommand, null)
+        _wepinPinManager.wepinSessionManager?.checkLoginStatusAndGetLifeCycle()
+            ?.thenCompose { lifeCycle ->
+                if (lifeCycle == WepinLifeCycle.LOGIN || lifeCycle == WepinLifeCycle.LOGIN_BEFORE_REGISTER) {
+
+                    _wepinPinManager.wepinWebViewManager?.openWidgetWithCommand(
+                        _appContext!!,
+                        subCommand,
+                        null
+                    )
                 } else {
                     throw WepinError.INVALID_LOGIN_SESSION
                 }
-            }
-            .thenApply { result ->
+            }?.thenApply { result ->
                 if (result is String && handleJsonResult(result, subCommand, completableFuture)) {
                     val data = JSONObject(result).getJSONObject("body").getJSONObject("data")
                     val uvd = EncUVD.fromJson(data.getJSONObject("UVD").toMap())
                     val hint = EncPinHint.fromJson(data.getJSONObject("hint").toMap())
                     completableFuture.complete(RegistrationPinBlock(uvd = uvd, hint = hint))
                 }
-            }
-            .exceptionally { e ->
-                val actualError = if (e.cause is WepinError) {
-                    e.cause as WepinError
+            }?.exceptionally { error ->
+                val actualError = if (error.cause is WepinError) {
+                    error.cause
                 } else {
-                    WepinError.generalUnKnownEx(e.cause?.message ?: e.message)
+                    WepinError.generalUnKnownEx(error.cause?.message ?: error.message)
                 }
                 completableFuture.completeExceptionally(actualError)
-                null
             }
         return completableFuture
     }
 
     fun generateAuthPINBlock(count: Int? = null): CompletableFuture<AuthPinBlock?> {
-        Log.i(TAG, "generateAuthPINBlock")
         val completableFuture = CompletableFuture<AuthPinBlock?>()
         val subCommand: String = Command.CMD_SUB_PIN_AUTH
 
@@ -153,78 +153,81 @@ class WepinPin(wepinPinParams: WepinPinParams) {
             return completableFuture
         }
 
-        checkExistWepinLoginSession()
-            .thenCompose { sessionExists ->
-                if (sessionExists) {
+        _wepinPinManager.wepinSessionManager?.checkLoginStatusAndGetLifeCycle()
+            ?.thenCompose { lifeCycle ->
+                if (lifeCycle == WepinLifeCycle.LOGIN || lifeCycle == WepinLifeCycle.LOGIN_BEFORE_REGISTER) {
                     var param = mapOf("count" to 1)
-                    if(count != null) {
+                    if (count != null) {
                         param = mapOf("count" to count)
                     }
-                    _wepinPinManager.openAndRequestWepinWidgetAsync(subCommand, param)
+                    _wepinPinManager.wepinWebViewManager?.openWidgetWithCommand(
+                        _appContext!!,
+                        subCommand,
+                        param
+                    )
                 } else {
+                    completableFuture.completeExceptionally(WepinError.INVALID_LOGIN_SESSION)
                     throw WepinError.INVALID_LOGIN_SESSION
                 }
-            }
-            .thenApply { result ->
+            }?.thenApply { result ->
                 if (result is String && handleJsonResult(result, subCommand, completableFuture)) {
-                    val data = JSONObject(result).getJSONObject("body").getJSONObject("data").toMap()
+                    val data =
+                        JSONObject(result).getJSONObject("body").getJSONObject("data").toMap()
                     val authPinBlock = AuthPinBlock.fromJson(data)
                     completableFuture.complete(authPinBlock)
                 }
-            }
-            .exceptionally { e ->
-                val actualError = if (e.cause is WepinError) {
-                    e.cause as WepinError
+            }?.exceptionally { error ->
+                val actualError = if (error.cause is WepinError) {
+                    error.cause
                 } else {
-                    WepinError.generalUnKnownEx(e.cause?.message ?: e.message)
+                    WepinError.generalUnKnownEx(error.cause?.message ?: error.message)
                 }
                 completableFuture.completeExceptionally(actualError)
-                null
             }
-
         return completableFuture
     }
 
     fun generateChangePINBlock(): CompletableFuture<ChangePinBlock> {
-        Log.i(TAG, "generateChangePINBlock")
         val completableFuture = CompletableFuture<ChangePinBlock>()
-        val subCommand: String = Command.CMD_SUB_PIN_CHANGE
+        val subCommand = Command.CMD_SUB_PIN_CHANGE
 
         if (!_isInitialized) {
             completableFuture.completeExceptionally(WepinError.NOT_INITIALIZED_ERROR)
             return completableFuture
         }
 
-        checkExistWepinLoginSession()
-            .thenCompose { sessionExists ->
-                if (sessionExists) {
-                    _wepinPinManager.openAndRequestWepinWidgetAsync(subCommand, null)
+        _wepinPinManager.wepinSessionManager?.checkLoginStatusAndGetLifeCycle()
+            ?.thenCompose { lifeCycle ->
+                if (lifeCycle == WepinLifeCycle.LOGIN || lifeCycle == WepinLifeCycle.LOGIN_BEFORE_REGISTER) {
+
+                    _wepinPinManager.wepinWebViewManager?.openWidgetWithCommand(
+                        _appContext!!,
+                        subCommand,
+                        null
+                    )
                 } else {
+                    completableFuture.completeExceptionally(WepinError.INVALID_LOGIN_SESSION)
                     throw WepinError.INVALID_LOGIN_SESSION
                 }
-            }
-            .thenApply { result ->
+            }?.thenApply { result ->
                 if (result is String && handleJsonResult(result, subCommand, completableFuture)) {
-                    val data = JSONObject(result).getJSONObject("body").getJSONObject("data").toMap()
+                    val data =
+                        JSONObject(result).getJSONObject("body").getJSONObject("data").toMap()
                     val changePinBlock = ChangePinBlock.fromJson(data)
                     completableFuture.complete(changePinBlock)
                 }
-            }
-            .exceptionally { e ->
-                val actualError = if (e.cause is WepinError) {
-                    e.cause as WepinError
+            }?.exceptionally { error ->
+                val actualError = if (error.cause is WepinError) {
+                    error.cause
                 } else {
-                    WepinError.generalUnKnownEx(e.cause?.message ?: e.message)
+                    WepinError.generalUnKnownEx(error.cause?.message ?: error.message)
                 }
                 completableFuture.completeExceptionally(actualError)
-                null
             }
-
         return completableFuture
     }
 
     fun generateAuthOTPCode(): CompletableFuture<AuthOTP> {
-        Log.i(TAG, "generateAuthOTPCode")
         val completableFuture = CompletableFuture<AuthOTP>()
         val subCommand: String = Command.CMD_SUB_PIN_OTP
 
@@ -233,94 +236,44 @@ class WepinPin(wepinPinParams: WepinPinParams) {
             return completableFuture
         }
 
-        checkExistWepinLoginSession()
-            .thenCompose { sessionExists ->
-                if (sessionExists) {
-                    _wepinPinManager.openAndRequestWepinWidgetAsync(subCommand, null)
+        _wepinPinManager.wepinSessionManager?.checkLoginStatusAndGetLifeCycle()
+            ?.thenCompose { lifeCycle ->
+                if (lifeCycle == WepinLifeCycle.LOGIN || lifeCycle == WepinLifeCycle.LOGIN_BEFORE_REGISTER) {
+
+                    _wepinPinManager.wepinWebViewManager?.openWidgetWithCommand(
+                        _appContext!!,
+                        subCommand,
+                        null
+                    )
                 } else {
+                    completableFuture.completeExceptionally(WepinError.INVALID_LOGIN_SESSION)
                     throw WepinError.INVALID_LOGIN_SESSION
                 }
-            }
-            .thenApply { result ->
+            }?.thenApply { result ->
                 if (result is String && handleJsonResult(result, subCommand, completableFuture)) {
-                    val data = JSONObject(result).getJSONObject("body").getJSONObject("data")
-                    val otpCode = data.getString("code")
-                    completableFuture.complete(AuthOTP(otpCode))
+                    val data =
+                        JSONObject(result).getJSONObject("body").getJSONObject("data")
+
+                    val otpCode = AuthOTP(data.getString("code"))
+                    completableFuture.complete(otpCode)
                 }
-            }
-            .exceptionally { e ->
-                val actualError = if (e.cause is WepinError) {
-                    e.cause as WepinError
+            }?.exceptionally { error ->
+                val actualError = if (error.cause is WepinError) {
+                    error.cause
                 } else {
-                    WepinError.generalUnKnownEx(e.cause?.message ?: e.message)
+                    WepinError.generalUnKnownEx(error.cause?.message ?: error.message)
                 }
                 completableFuture.completeExceptionally(actualError)
-                null
             }
-
         return completableFuture
     }
 
     fun finalize() {
-        Log.i(TAG, "finalize")
+        _wepinPinManager.finalize()
+        login?.finalize()
         _isInitialized = false
     }
 
-
-    private fun <T> handleJsonResult(result: String, subCommand: String, completableFuture: CompletableFuture<T>): Boolean {
-        Log.i(TAG, "handleJsonResult")
-        val jsonResult = JSONObject(result)
-        val command = jsonResult.getJSONObject("body").getString("command")
-        val state = jsonResult.getJSONObject("body").getString("state")
-
-        return if (command == subCommand) {
-            if (state.equals("SUCCESS", true)) {
-                true
-            } else {
-                val data = jsonResult.getJSONObject("body").getString("data")
-                completableFuture.completeExceptionally(WepinError.generalUnKnownEx(data))
-                false
-            }
-        } else {
-            val errMsg = "Unexpected command: command=$command, expected=$subCommand"
-            completableFuture.completeExceptionally(WepinError.generalUnKnownEx(errMsg))
-            false
-        }
-    }
-
-    private fun checkExistWepinLoginSession(): CompletableFuture<Boolean> {
-        Log.i(TAG, "checkExistWepinLoginSession")
-        val wepinCompletableFuture = CompletableFuture<Boolean>()
-        val token = WepinStorageManager.getStorage<StorageDataType>("wepin:connectUser")
-        val userId = WepinStorageManager.getStorage<String>("user_id")
-
-        if (token != null && userId != null) {
-            val wepinToken = token as StorageDataType.WepinToken
-            _wepinNetworkManager?.setAuthToken(wepinToken.accessToken, wepinToken.refreshToken)
-            _wepinNetworkManager?.getAccessToken(userId as String)
-                ?.thenApply { response ->
-                    WepinStorageManager.setStorage<StorageDataType>(
-                        "wepin:connectUser",
-                        StorageDataType.WepinToken(
-                            accessToken = response,
-                            refreshToken = wepinToken.refreshToken
-                        )
-                    )
-                    _wepinNetworkManager?.setAuthToken(response, wepinToken.refreshToken)
-                    wepinCompletableFuture.complete(true)
-                }?.exceptionally {
-                    _wepinNetworkManager?.clearAuthToken()
-                    wepinCompletableFuture.complete(false)
-                }
-        } else {
-            _wepinNetworkManager?.clearAuthToken()
-            wepinCompletableFuture.complete(false)
-        }
-
-        return wepinCompletableFuture
-    }
-
-    // Helper functions to convert JSONObject and JSONArray to Map and List respectively
     private fun JSONObject.toMap(): Map<String, Any?> {
         val map = mutableMapOf<String, Any?>()
         val keys = this.keys()
@@ -351,4 +304,3 @@ class WepinPin(wepinPinParams: WepinPinParams) {
         return list
     }
 }
-

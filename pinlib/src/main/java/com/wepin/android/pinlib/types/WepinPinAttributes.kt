@@ -1,12 +1,18 @@
 package com.wepin.android.pinlib.types
 
-data class WepinPinAttributes(
-    var defaultLanguage: String? = "en"
-) {
-    init {
-        if (defaultLanguage !in listOf("ko", "ja", "en")) {
-            defaultLanguage = "en" // "ko", "ja", "en" 외의 값은 기본 "en"으로
-        }
-    }
-}
+import android.content.Context
+import com.wepin.android.commonlib.types.WepinAttribute
 
+//typealias WepinPinAttributes = WepinAttribute
+
+class WepinPinAttributes(defaultLanguage: String? = "en", defaultCurrency: String? = "USD") :
+    WepinAttribute(defaultLanguage, defaultCurrency)
+
+class WepinPinAttributeWithProviders(
+    defaultLanguage: String? = "en",
+    defaultCurrency: String? = "USD",
+    var loginProviders: List<String> = emptyList()
+) : WepinAttribute(defaultLanguage, defaultCurrency)
+
+
+data class WepinWidgetParams(val context: Context, val appId: String, val appKey: String)

@@ -9,7 +9,7 @@ val sdkVersion = project.findProperty("wepinAndroidSdkVersion") ?: "LOCAL-SNAPSH
 rootProject.extra["wepinAndroidSdkVersion"] = sdkVersion
 
 android {
-    namespace = "com.wepin.android.pinLib"
+    namespace = "com.wepin.android.pinlib"
     compileSdk = 34
 
     defaultConfig {

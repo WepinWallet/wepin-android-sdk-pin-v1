@@ -1,4 +1,4 @@
 jdk:
   - openjdk17
 install:
-  - bash ./gradlew :pinLib:build
+  - bash ./gradlew :pinLib:build :pinLib:publishReleasePublicationToMavenLocal

@@ -36,6 +36,16 @@ android {
             )
         }
     }
+    libraryVariants.all {
+        outputs.all {
+            val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
+            output.outputFileName = when (name) {
+                "release" -> "wepin-pin-v${project.extra["wepinAndroidSdkVersion"]}.aar"
+                "debug" -> "debug-wepin-pin-v${project.extra["wepinAndroidSdkVersion"]}.aar"
+                else -> throw IllegalArgumentException("Unsupported build variant: $name")
+            }
+        }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -69,42 +79,14 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 }
 
-//mavenPublishing {
-////    publishToMavenCentral(SonatypeHost.DEFAULT)
-//    // or when publishing to https://s01.oss.sonatype.org
-////    publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
-//    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
-//
-//    signAllPublications()
-//    coordinates(
-//        "io.wepin",
-//        "wepin-android-sdk-pin-v1",
-//        "${rootProject.extra["wepinAndroidSdkVersion"]}"
-//    )
-//
-//    pom {
-//        name.set(project.name)
-//        description.set("Android common library for Wepin SDK")
-//        inceptionYear.set("2025")
-//        url.set("https://github.com/WepinWallet/wepin-android-sdk-pin-v1")
-//        licenses {
-//            license {
-//                name.set("The Apache License, Version 2.0")
-//                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-//                distribution.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-//            }
-//        }
-//        developers {
-//            developer {
-//                id.set("IoTrust")
-//                name.set("wepin.dev")
-////                url.set("https://github.com/WepinWallet/wepin-android-sdk-login-v1")
-//            }
-//        }
-//        scm {
-////            url.set("https://github.com/WepinWallet/wepin-android-sdk-login-v1/")
-////            connection.set("scm:git:git://github.com/WepinWallet/wepin-android-sdk-login-v1")
-////            developerConnection.set("scm:git:ssh://git@github.com/WepinWallet/wepin-android-sdk-login-v1")
-//        }
-//    }
-//}
+afterEvaluate {
+    publishing {
+        publications {
+            register<MavenPublication>("release") {
+                from(components["release"])
+                groupId = "com.github.WepinWallet"
+                artifactId = "wepin-android-sdk-pin-v1"
+            }
+        }
+    }
+}

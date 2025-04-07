@@ -1,8 +1,7 @@
 plugins {
-    id("maven-publish")
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
-//    alias(libs.plugins.maven.publish)
+    id("maven-publish")
 }
 
 val sdkVersion = project.findProperty("wepinAndroidSdkVersion") ?: "LOCAL-SNAPSHOT"
@@ -90,3 +89,4 @@ afterEvaluate {
         }
     }
 }
+

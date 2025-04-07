@@ -68,7 +68,7 @@ dependencies {
     implementation("io.wepin:wepin-android-sdk-modal-v1:${sdkVersion}")
     implementation("io.wepin:wepin-android-sdk-storage-v1:${sdkVersion}")
     implementation("io.wepin:wepin-android-sdk-session-v1:${sdkVersion}")
-    api("com.github.WepinWallet:wepin-android-sdk-login-v1:v1.1.0-test2")
+    api("com.github.WepinWallet:wepin-android-sdk-login-v1:v${sdkVersion}")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

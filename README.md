@@ -352,7 +352,7 @@ The `finalize()` method finalizes the Wepin PinPad Libarary.
 
 #### Returns
 
-- void
+- <Boolean>
 
 #### Example
 

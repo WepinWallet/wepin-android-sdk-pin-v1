@@ -8,12 +8,4 @@
     <string name="default_line_client_id">LINE_CLIENT_ID</string>
     <string name="wepin_app_id">WEPIN_APP_ID</string>
     <string name="wepin_app_key">WEPIN_APP_KEY</string>
-    <!--    <string name="default_google_web_client_id">914682313325-c9kqcpmh0vflkqflsgh6cp35b4ife95q.apps.googleusercontent.com</string>-->
-    <!--    <string name="default_discord_client_id">1244924865098551296</string>-->
-    <!--    <string name="default_naver_client_id">TzwZUy3ZtAK5mxOsik9P</string>-->
-    <!--    <string name="default_apple_client_id">appauth.wepin</string>-->
-    <!--    <string name="default_facebook_client_id">1214719865834545</string>-->
-    <!--    <string name="default_line_client_id">2006421675</string>-->
-    <!--    <string name="wepin_app_id">a840783376386107736eed117085db29</string>-->
-    <!--    <string name="wepin_app_key">ak_dev_JVvbJXGwLyPfenXisFqjH8vVhz9oKtE4aDQPxgjxy1x</string>-->
 </resources>

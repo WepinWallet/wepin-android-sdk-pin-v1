@@ -2,14 +2,13 @@ package com.wepin.android.pinlib.manager
 
 import android.content.Context
 import com.wepin.android.commonlib.WepinCommon
-import com.wepin.android.loginlib.WepinLogin
-import com.wepin.android.loginlib.types.WepinLoginOptions
-import com.wepin.android.networklib.WepinNetwork
+import com.wepin.android.core.utils.getVersionMetaDataValue
+import com.wepin.android.core.WepinCoreManager
+import com.wepin.android.core.network.WepinNetwork
+import com.wepin.android.core.session.WepinSessionManager
 import com.wepin.android.pinlib.types.WepinPinAttributes
 import com.wepin.android.pinlib.types.WepinPinParams
-import com.wepin.android.pinlib.utils.getVersionMetaDataValue
 import com.wepin.android.pinlib.webview.WepinWebViewManager
-import com.wepin.android.sessionlib.WepinSessionManager
 import java.util.concurrent.CompletableFuture
 
 internal class WepinPinManager {
@@ -19,21 +18,29 @@ internal class WepinPinManager {
     var appKey: String? = null
     var packageName: String? = null
     val version: String = getVersionMetaDataValue()
-    lateinit var platformType: String
-    lateinit var sdkType: String
+    var sdkType: String = ""
     var wepinAttributes: WepinPinAttributes? = null
     var wepinSessionManager: WepinSessionManager? = null
     var wepinNetwork: WepinNetwork? = null
     var wepinWebViewManager: WepinWebViewManager? = null
-    var loginLib: WepinLogin? = null
 
     companion object {
+        @Volatile
         private var instance: WepinPinManager? = null
+
         fun getInstance(): WepinPinManager {
             if (instance == null) {
-                instance = WepinPinManager()
+                synchronized(this) {
+                    if (instance == null) {
+                        instance = WepinPinManager()
+                    }
+                }
             }
             return instance!!
+        }
+
+        fun clearInstance() {
+            instance = null
         }
     }
 
@@ -44,36 +51,34 @@ internal class WepinPinManager {
     fun initialize(
         wepinPinParams: WepinPinParams,
         attributes: WepinPinAttributes?,
-        platform: String? = "android"
+        platform: String = "android"
     ): CompletableFuture<Boolean> {
         val future = CompletableFuture<Boolean>()
         _appContext = wepinPinParams.context
         appId = wepinPinParams.appId
         appKey = wepinPinParams.appKey
         packageName = wepinPinParams.context.packageName
-        platformType = platform ?: "android"
-        sdkType = "${platform}-pin"
+        sdkType = "$platform-pin"
         wepinAttributes = WepinPinAttributes(
             defaultLanguage = attributes?.defaultLanguage,
             defaultCurrency = attributes?.defaultCurrency
         )
         val urlInfo = WepinCommon.getWepinSdkUrl(appKey!!)
 
-        WepinNetwork.initialize(_appContext!!, appKey!!, packageName!!, sdkType, version)
-            .thenApply { network ->
-                wepinNetwork = network
-
-                WepinSessionManager.initialize()
-                wepinSessionManager = WepinSessionManager.getInstance()
+        WepinCoreManager.initialize(
+            context = _appContext!!,
+            appId = appId!!,
+            appKey = appKey!!,
+            platformType = platform,
+            sdkType = sdkType
+        )
+            .thenApply {
+                wepinNetwork = WepinCoreManager.getNetwork()
+                wepinSessionManager = WepinCoreManager.getSession()
 
                 wepinWebViewManager =
-                    WepinWebViewManager(platformType, urlInfo["wepinWebview"] ?: "")
-                val wepinLoginOptions = WepinLoginOptions(
-                    context = _appContext!!,
-                    appId = wepinPinParams.appId,
-                    appKey = wepinPinParams.appKey,
-                )
-                loginLib = WepinLogin(wepinLoginOptions)
+                    WepinWebViewManager("$platform-$sdkType", urlInfo["wepinWebview"] ?: "")
+
                 future.complete(true)
             }.exceptionally { throwable ->
                 future.completeExceptionally(throwable)
@@ -82,10 +87,16 @@ internal class WepinPinManager {
         return future
     }
 
-    fun finalize() {
-        wepinNetwork?.finalize()
+
+    fun clear() {
+        WepinCoreManager.clear()
+        _appContext = null
+        appId = null
+        appKey = null
+        packageName = null
+        sdkType = ""
+        wepinAttributes = null
         wepinNetwork = null
-        wepinSessionManager?.finalize()
         wepinSessionManager = null
         wepinWebViewManager?.closeWidget()
         wepinWebViewManager = null

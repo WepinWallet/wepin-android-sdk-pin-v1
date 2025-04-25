@@ -6,6 +6,7 @@ import com.wepin.android.commonlib.error.WepinError
 import com.wepin.android.commonlib.types.WepinAttribute
 import com.wepin.android.commonlib.types.WepinLifeCycle
 import com.wepin.android.loginlib.WepinLogin
+import com.wepin.android.loginlib.types.WepinLoginOptions
 import com.wepin.android.pinlib.manager.WepinPinManager
 import com.wepin.android.pinlib.types.AuthOTP
 import com.wepin.android.pinlib.types.AuthPinBlock
@@ -28,11 +29,19 @@ class WepinPin(wepinPinParams: WepinPinParams) {
     private var _appKey: String = wepinPinParams.appKey
     private var _isInitialized: Boolean = false
     private var _attributes: WepinAttribute? = null
-    private var _wepinPinManager: WepinPinManager = WepinPinManager.getInstance()
+    private lateinit var _wepinPinManager: WepinPinManager
 
     var login: WepinLogin? = null
-        get() = _wepinPinManager.loginLib
         private set // 외부에서 변경 불가능하게 설정
+
+    init {
+        val wepinLoginOptions = WepinLoginOptions(
+            context = _appContext!!,
+            appId = wepinPinParams.appId,
+            appKey = wepinPinParams.appKey,
+        )
+        login = WepinLogin(wepinLoginOptions)
+    }
 
     fun initialize(attributes: WepinPinAttributes? = null): CompletableFuture<Boolean> {
         Log.i(TAG, "initialize")
@@ -44,6 +53,7 @@ class WepinPin(wepinPinParams: WepinPinParams) {
         }
         _attributes = attributes
 
+        _wepinPinManager = WepinPinManager.getInstance()
         _wepinPinManager.initialize(
             wepinPinParams = WepinPinParams(
                 _appContext!!,
@@ -268,10 +278,15 @@ class WepinPin(wepinPinParams: WepinPinParams) {
         return completableFuture
     }
 
-    fun finalize() {
-        _wepinPinManager.finalize()
+    fun finalize(): Boolean {
+        if (!_isInitialized) {
+            throw WepinError.NOT_INITIALIZED_ERROR
+        }
+        _wepinPinManager.clear()
+        WepinPinManager.clearInstance()
         login?.finalize()
         _isInitialized = false
+        return true
     }
 
     private fun JSONObject.toMap(): Map<String, Any?> {

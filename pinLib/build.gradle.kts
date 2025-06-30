@@ -56,15 +56,10 @@ android {
 
 dependencies {
     //Wepin
-//    api(project(":libs:common:commonLib"))
-//    implementation(project(":libs:modal:modalLib"))
-//    implementation(project(":libs:core:coreLib"))
-//    api(project(":libs:login:loginLib"))
-
-    api("io.wepin:wepin-android-sdk-common-v1:1.1.1")
-    implementation("io.wepin:wepin-android-sdk-modal-v1:1.1.1")
-    implementation("io.wepin:wepin-android-sdk-core-v1:1.1.1")
-    api("com.github.WepinWallet:wepin-android-sdk-login-v1:v1.1.1")
+    api("io.wepin:wepin-android-sdk-common-v1:${sdkVersion}")
+    implementation("io.wepin:wepin-android-sdk-modal-v1:${sdkVersion}")
+    implementation("io.wepin:wepin-android-sdk-core-v1:${sdkVersion}")
+    api("com.github.WepinWallet:wepin-android-sdk-login-v1:v${sdkVersion}")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

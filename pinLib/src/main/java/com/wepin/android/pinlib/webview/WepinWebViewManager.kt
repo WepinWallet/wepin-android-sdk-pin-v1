@@ -3,8 +3,8 @@ package com.wepin.android.pinlib.webview
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import com.wepin.android.commonlib.error.WepinError.Companion.mapWebviewErrorToWepinError
+import com.wepin.android.core.utils.Log
 import com.wepin.android.modal.WepinModal
 import com.wepin.android.pinlib.webview.JSProcessor.processRequest
 import kotlinx.coroutines.CompletableDeferred
@@ -44,7 +44,6 @@ internal class WepinWebViewManager(platformType: String, widgetUrl: String) {
         command: String,
         parameter: Any?
     ): CompletableFuture<Any> {
-        Log.d(TAG, "openWidgetWithCommand")
         val completableFuture = CompletableFuture<Any>()
         val id = System.currentTimeMillis()
         val finalParameter = parameter ?: emptyMap<String, Any?>()
@@ -74,7 +73,6 @@ internal class WepinWebViewManager(platformType: String, widgetUrl: String) {
             } else {
                 try {
                     val result = _responseDeferred!!.getCompleted()
-                    Log.d(TAG, "_responseDeferred result : $result")
                     val jsonResult = JSONObject(result)
                     val state = jsonResult.getJSONObject("body").getString("state")
 

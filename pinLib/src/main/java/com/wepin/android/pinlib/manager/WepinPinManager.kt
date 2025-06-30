@@ -2,7 +2,7 @@ package com.wepin.android.pinlib.manager
 
 import android.content.Context
 import com.wepin.android.commonlib.WepinCommon
-import com.wepin.android.core.utils.getVersionMetaDataValue
+import com.wepin.android.commonlib.utils.getVersionMetaDataValue
 import com.wepin.android.core.WepinCoreManager
 import com.wepin.android.core.network.WepinNetwork
 import com.wepin.android.core.session.WepinSessionManager
@@ -63,7 +63,7 @@ internal class WepinPinManager {
             defaultLanguage = attributes?.defaultLanguage,
             defaultCurrency = attributes?.defaultCurrency
         )
-        val urlInfo = WepinCommon.getWepinSdkUrl(appKey!!)
+
 
         WepinCoreManager.initialize(
             context = _appContext!!,
@@ -75,6 +75,7 @@ internal class WepinPinManager {
             .thenApply {
                 wepinNetwork = WepinCoreManager.getNetwork()
                 wepinSessionManager = WepinCoreManager.getSession()
+                val urlInfo = WepinCommon.getWepinSdkUrl(appKey!!)
 
                 wepinWebViewManager =
                     WepinWebViewManager("$platform-$sdkType", urlInfo["wepinWebview"] ?: "")

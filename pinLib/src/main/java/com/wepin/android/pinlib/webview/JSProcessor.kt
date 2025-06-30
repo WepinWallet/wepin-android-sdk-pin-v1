@@ -33,7 +33,7 @@ object JSProcessor {
     private val TAG = this.javaClass.name
 
     fun processRequest(request: String, callback: (response: String) -> Any) {
-        Log.d(TAG, "processRequest : $request")
+//        Log.d(TAG, "processRequest : $request")
         try {
             val objectMapper = ObjectMapper()
             // 메시지를 JSONObject로 변환
@@ -154,7 +154,7 @@ object JSProcessor {
             }
 
             val response = objectMapper.writeValueAsString(jsResponse)
-            Log.d(TAG, "JSProcessor Response : $response")
+//            Log.d(TAG, "JSProcessor Response : $response")
 
             // JSInterface의 onResponse 메서드를 통해 JavaScript로 응답 전송
             callback(response)

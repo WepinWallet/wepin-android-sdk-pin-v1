@@ -1,10 +1,10 @@
 package com.wepin.android.pinlib
 
 import android.content.Context
-import android.util.Log
 import com.wepin.android.commonlib.error.WepinError
 import com.wepin.android.commonlib.types.WepinAttribute
 import com.wepin.android.commonlib.types.WepinLifeCycle
+import com.wepin.android.core.utils.Log
 import com.wepin.android.loginlib.WepinLogin
 import com.wepin.android.loginlib.types.WepinLoginOptions
 import com.wepin.android.pinlib.manager.WepinPinManager
@@ -22,7 +22,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
 
-class WepinPin(wepinPinParams: WepinPinParams) {
+class WepinPin(wepinPinParams: WepinPinParams, private var platformType: String? = "android") {
     private val TAG = this.javaClass.name
     private var _appContext: Context? = wepinPinParams.context
     private var _appId: String = wepinPinParams.appId
@@ -40,7 +40,7 @@ class WepinPin(wepinPinParams: WepinPinParams) {
             appId = wepinPinParams.appId,
             appKey = wepinPinParams.appKey,
         )
-        login = WepinLogin(wepinLoginOptions)
+        login = WepinLogin(wepinLoginOptions, platformType)
     }
 
     fun initialize(attributes: WepinPinAttributes? = null): CompletableFuture<Boolean> {
@@ -63,26 +63,20 @@ class WepinPin(wepinPinParams: WepinPinParams) {
             attributes = attributes
         ).thenCompose {
             _wepinPinManager.wepinNetwork?.let { network ->
-                network.getAppInfo().thenApply { infoResponse ->
-                    if (!infoResponse) {
-                        wepinCompletableFuture.complete(false)
-                        _isInitialized = false
+                login?.init()?.thenCompose {
+                    _wepinPinManager.wepinSessionManager?.checkLoginStatusAndGetLifeCycle()
+                        ?.thenApply {
+                            _isInitialized = true
+                            wepinCompletableFuture.complete(true)
+                            true
+                        } ?: run {
+                        _isInitialized = true
 
-                        return@thenApply false
+                        wepinCompletableFuture.complete(true)
+                        wepinCompletableFuture
                     }
-
-                    login?.init()?.exceptionally { error ->
-                        Log.e(TAG, "$error")
-                        null
-                    }?.thenApply {
-                        _wepinPinManager.wepinSessionManager?.checkLoginStatusAndGetLifeCycle()
-                            ?.thenApply { }
-                    }
-
-                    _isInitialized = true
-                    wepinCompletableFuture.complete(true)
-                    true
                 }?.exceptionally { error ->
+                    _wepinPinManager.clear()
                     _isInitialized = false
                     wepinCompletableFuture.completeExceptionally(error)
                     null
@@ -167,7 +161,7 @@ class WepinPin(wepinPinParams: WepinPinParams) {
             ?.thenCompose { lifeCycle ->
                 if (lifeCycle == WepinLifeCycle.LOGIN || lifeCycle == WepinLifeCycle.LOGIN_BEFORE_REGISTER) {
                     var param = mapOf("count" to 1)
-                    if (count != null) {
+                    if (count != null && count > 0) {
                         param = mapOf("count" to count)
                     }
                     _wepinPinManager.wepinWebViewManager?.openWidgetWithCommand(
@@ -279,9 +273,6 @@ class WepinPin(wepinPinParams: WepinPinParams) {
     }
 
     fun finalize(): Boolean {
-        if (!_isInitialized) {
-            throw WepinError.NOT_INITIALIZED_ERROR
-        }
         _wepinPinManager.clear()
         WepinPinManager.clearInstance()
         login?.finalize()
